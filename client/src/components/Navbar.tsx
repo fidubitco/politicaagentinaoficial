@@ -8,7 +8,7 @@ export default function Navbar() {
 
   const categories = [
     "Nacional", "Provincial", "Economía", "Internacional", 
-    "Análisis IA", "Dashboard"
+    "Análisis", "Dashboard"
   ];
 
   return (

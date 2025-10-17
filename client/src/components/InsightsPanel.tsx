@@ -21,7 +21,7 @@ export default function InsightsPanel({ title, insights }: InsightsPanelProps) {
             <Brain className="h-5 w-5 text-accent" />
             <span data-testid="text-insights-title">{title}</span>
           </CardTitle>
-          <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-semibold rounded-sm">IA</span>
+          <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-semibold rounded-sm">ANÁLISIS</span>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

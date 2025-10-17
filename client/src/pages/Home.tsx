@@ -69,7 +69,7 @@ export default function Home() {
     }
   ];
 
-  // AI Insights
+  // Editorial Insights
   const electoralInsights = [
     { scenario: "Victoria 1ra Vuelta", probability: 42, trend: "up" as const },
     { scenario: "Ballotage Necesario", probability: 38, trend: "stable" as const },
@@ -162,13 +162,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* AI Insights Section - Bloomberg Style */}
+        {/* Editorial Insights Section - Bloomberg Style */}
         <section className="py-16 bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-8 pb-4 border-b-2 border-accent">
-              <h2 className="text-3xl font-serif font-bold">Análisis con Inteligencia Artificial</h2>
+              <h2 className="text-3xl font-serif font-bold">Inteligencia Editorial</h2>
               <p className="text-muted-foreground mt-2">
-                Predicciones basadas en modelos de machine learning con 5000+ variables
+                Análisis predictivo basado en modelos avanzados con 5000+ variables
               </p>
             </div>
             

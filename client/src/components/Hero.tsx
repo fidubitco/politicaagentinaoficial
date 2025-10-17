@@ -23,15 +23,15 @@ export default function Hero() {
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 leading-tight group-hover:text-primary transition-colors" data-testid="text-hero-headline">
-                Predicciones IA para Elecciones 2025: Tres Escenarios Clave
+                Análisis Electoral 2025: Tres Escenarios Clave
               </h2>
               <p className="text-lg text-muted-foreground mb-4 leading-relaxed" data-testid="text-hero-excerpt">
-                Nuestro modelo de inteligencia artificial analiza 5000+ variables políticas 
+                Nuestro equipo analiza 5000+ variables políticas y económicas 
                 para proyectar los escenarios más probables en las próximas elecciones presidenciales. 
-                Análisis provincial completo y predicción de resultados por distrito.
+                Análisis provincial completo y proyección de resultados por distrito.
               </p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Equipo IA Política</span>
+                <span className="font-medium text-foreground">Equipo Editorial</span>
                 <span>•</span>
                 <span>16 Oct 2024</span>
                 <span>•</span>
@@ -44,7 +44,7 @@ export default function Hero() {
           <div className="lg:col-span-1 space-y-6">
             {[
               {
-                title: "Dólar Blue: Proyección IA para Próximos 30 Días",
+                title: "Dólar Blue: Proyección Exclusiva para Próximos 30 Días",
                 category: "Economía",
                 time: "5 min",
                 image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&q=80"

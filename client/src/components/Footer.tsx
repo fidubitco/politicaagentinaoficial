@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 export default function Footer() {
   const footerSections = {
     "Secciones": ["Nacional", "Provincial", "Economía", "Internacional", "Tecnología", "Deportes"],
-    "Análisis": ["Dashboard IA", "Predicciones", "Encuestas", "Datos Abiertos", "Metodología"],
+    "Análisis": ["Dashboard", "Predicciones", "Encuestas", "Datos Abiertos", "Metodología"],
     "Información": ["Sobre Nosotros", "Equipo Editorial", "Contacto", "Anunciar", "Newsletter"]
   };
 
@@ -18,7 +18,7 @@ export default function Footer() {
               POLÍTICA ARGENTINA
             </h3>
             <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-              Análisis político con inteligencia artificial. Cobertura profesional de la política nacional y provincial.
+              Inteligencia editorial avanzada. Cobertura profesional de la política nacional y provincial.
             </p>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" className="hover-elevate" data-testid="button-social-twitter">
