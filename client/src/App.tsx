@@ -22,6 +22,7 @@ import AdminSources from "@/pages/admin/AdminSources";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import AdminGenerator from "@/pages/admin/AdminGenerator";
 import AdminBulkGenerator from "@/pages/admin/AdminBulkGenerator";
+import AdminAnalytics from "@/pages/admin/AdminAnalytics";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -125,7 +126,13 @@ function Router() {
           <AdminBulkGenerator />
         </AdminLayout>
       </Route>
-      
+
+      <Route path="/admin/analytics">
+        <AdminLayout>
+          <AdminAnalytics />
+        </AdminLayout>
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );

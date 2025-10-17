@@ -1,14 +1,16 @@
 import type { Express } from "express";
 import { storage } from "./storage";
 import { drizzle } from "drizzle-orm/neon-http";
-import { neon, neonConfig } from "@neondatabase/serverless";
+import { neon } from "@neondatabase/serverless";
 
-// Configure Neon to use HTTP instead of WebSocket
-neonConfig.fetchConnectionCache = true;
-
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
-import { articles, categories, sources, translations, categoryTranslations, insertArticleSchema, insertCategorySchema, insertSourceSchema } from "@shared/schema";
+import {
+  articles, categories, sources, translations, categoryTranslations,
+  insertArticleSchema, insertCategorySchema, insertSourceSchema,
+  comments, insertCommentSchema, articleAnalytics, trendingTopics,
+  bookmarks, insertBookmarkSchema, notifications, insertNotificationSchema,
+  newsletterSubscribers, insertNewsletterSubscriberSchema, tags, insertTagSchema,
+  articleTags, insertArticleTagSchema
+} from "@shared/schema";
 import { translateArticle, translateCategory, getSupportedLocales, type SupportedLocale } from "./services/translation";
 import { eq, desc, sql as sqlOp } from "drizzle-orm";
 import { z } from "zod";
@@ -21,6 +23,13 @@ import { join } from "path";
 import { createServer } from "http";
 
 export function registerRoutes(app: Express) {
+  // Initialize database connection
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL environment variable is required");
+  }
+  const sql = neon(process.env.DATABASE_URL);
+  const db = drizzle(sql);
+
   // Articles
   app.get("/api/articles", async (req, res) => {
     try {
@@ -947,6 +956,510 @@ Disallow: /admin/`;
     }
   });
 
+  // SEARCH API - Advanced article search with filters
+  app.get("/api/search", async (req, res) => {
+    try {
+      const { q, category, author, startDate, endDate, limit = "20" } = req.query;
+
+      let query = db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          summary: articles.summary,
+          imageUrl: articles.imageUrl,
+          author: articles.author,
+          publishedAt: articles.publishedAt,
+          viewCount: articles.viewCount,
+          categoryName: categories.name,
+          categorySlug: categories.slug,
+          categoryColor: categories.color,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.publishedAt))
+        .limit(parseInt(limit as string));
+
+      const results = await query;
+
+      // Filter by search query (title or summary contains the query)
+      let filtered = results;
+      if (q) {
+        const searchTerm = (q as string).toLowerCase();
+        filtered = filtered.filter(article =>
+          article.title?.toLowerCase().includes(searchTerm) ||
+          article.summary?.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Filter by category
+      if (category) {
+        filtered = filtered.filter(article => article.categorySlug === category);
+      }
+
+      // Filter by author
+      if (author) {
+        filtered = filtered.filter(article => article.author === author);
+      }
+
+      // Filter by date range
+      if (startDate) {
+        filtered = filtered.filter(article =>
+          article.publishedAt && new Date(article.publishedAt) >= new Date(startDate as string)
+        );
+      }
+      if (endDate) {
+        filtered = filtered.filter(article =>
+          article.publishedAt && new Date(article.publishedAt) <= new Date(endDate as string)
+        );
+      }
+
+      res.json({
+        results: filtered,
+        total: filtered.length,
+        query: { q, category, author, startDate, endDate }
+      });
+    } catch (error) {
+      console.error("Error searching articles:", error);
+      res.status(500).json({ error: "Failed to search articles" });
+    }
+  });
+
+  // TRENDING TOPICS API
+  app.get("/api/trending", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const trending = await db
+        .select()
+        .from(trendingTopics)
+        .orderBy(desc(trendingTopics.count), desc(trendingTopics.lastUpdated))
+        .limit(limit);
+
+      res.json(trending);
+    } catch (error) {
+      console.error("Error fetching trending topics:", error);
+      res.status(500).json({ error: "Failed to fetch trending topics" });
+    }
+  });
+
+  // TRENDING ARTICLES - Most viewed in last 24h
+  app.get("/api/trending/articles", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const hours = parseInt(req.query.hours as string) || 24;
+
+      const cutoffDate = new Date();
+      cutoffDate.setHours(cutoffDate.getHours() - hours);
+
+      const trendingArticles = await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          summary: articles.summary,
+          imageUrl: articles.imageUrl,
+          author: articles.author,
+          publishedAt: articles.publishedAt,
+          viewCount: articles.viewCount,
+          categoryName: categories.name,
+          categoryColor: categories.color,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.viewCount))
+        .limit(limit);
+
+      res.json(trendingArticles);
+    } catch (error) {
+      console.error("Error fetching trending articles:", error);
+      res.status(500).json({ error: "Failed to fetch trending articles" });
+    }
+  });
+
+  // COMMENTS API
+  app.get("/api/articles/:articleId/comments", async (req, res) => {
+    try {
+      const articleComments = await db
+        .select()
+        .from(comments)
+        .where(eq(comments.articleId, req.params.articleId))
+        .orderBy(desc(comments.createdAt));
+
+      res.json(articleComments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ error: "Failed to fetch comments" });
+    }
+  });
+
+  app.post("/api/articles/:articleId/comments", async (req, res) => {
+    try {
+      const validatedData = insertCommentSchema.parse({
+        ...req.body,
+        articleId: req.params.articleId
+      });
+
+      const [newComment] = await db.insert(comments).values(validatedData).returning();
+      res.json(newComment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create comment" });
+    }
+  });
+
+  app.patch("/api/comments/:id/approve", async (req, res) => {
+    try {
+      const [updated] = await db
+        .update(comments)
+        .set({ isApproved: true })
+        .where(eq(comments.id, req.params.id))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error approving comment:", error);
+      res.status(500).json({ error: "Failed to approve comment" });
+    }
+  });
+
+  app.delete("/api/comments/:id", async (req, res) => {
+    try {
+      const [deleted] = await db
+        .delete(comments)
+        .where(eq(comments.id, req.params.id))
+        .returning();
+
+      if (!deleted) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ error: "Failed to delete comment" });
+    }
+  });
+
+  // BOOKMARKS API
+  app.get("/api/bookmarks", async (req, res) => {
+    try {
+      const userId = req.query.userId as string;
+      if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
+      }
+
+      const userBookmarks = await db
+        .select({
+          id: bookmarks.id,
+          createdAt: bookmarks.createdAt,
+          article: {
+            id: articles.id,
+            title: articles.title,
+            slug: articles.slug,
+            summary: articles.summary,
+            imageUrl: articles.imageUrl,
+            author: articles.author,
+            publishedAt: articles.publishedAt,
+            categoryName: categories.name,
+          }
+        })
+        .from(bookmarks)
+        .leftJoin(articles, eq(bookmarks.articleId, articles.id))
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(bookmarks.userId, userId))
+        .orderBy(desc(bookmarks.createdAt));
+
+      res.json(userBookmarks);
+    } catch (error) {
+      console.error("Error fetching bookmarks:", error);
+      res.status(500).json({ error: "Failed to fetch bookmarks" });
+    }
+  });
+
+  app.post("/api/bookmarks", async (req, res) => {
+    try {
+      const validatedData = insertBookmarkSchema.parse(req.body);
+      const [newBookmark] = await db.insert(bookmarks).values(validatedData).returning();
+      res.json(newBookmark);
+    } catch (error) {
+      console.error("Error creating bookmark:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create bookmark" });
+    }
+  });
+
+  app.delete("/api/bookmarks/:id", async (req, res) => {
+    try {
+      const [deleted] = await db
+        .delete(bookmarks)
+        .where(eq(bookmarks.id, req.params.id))
+        .returning();
+
+      if (!deleted) {
+        return res.status(404).json({ error: "Bookmark not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting bookmark:", error);
+      res.status(500).json({ error: "Failed to delete bookmark" });
+    }
+  });
+
+  // NOTIFICATIONS API
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const userId = req.query.userId as string;
+      if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
+      }
+
+      const userNotifications = await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.userId, userId))
+        .orderBy(desc(notifications.createdAt))
+        .limit(50);
+
+      res.json(userNotifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    try {
+      const validatedData = insertNotificationSchema.parse(req.body);
+      const [newNotification] = await db.insert(notifications).values(validatedData).returning();
+      res.json(newNotification);
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create notification" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const [updated] = await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(eq(notifications.id, req.params.id))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  // NEWSLETTER API
+  app.post("/api/newsletter/subscribe", async (req, res) => {
+    try {
+      const validatedData = insertNewsletterSubscriberSchema.parse(req.body);
+      const [subscriber] = await db.insert(newsletterSubscribers).values(validatedData).returning();
+      res.json({ success: true, subscriber });
+    } catch (error) {
+      console.error("Error subscribing to newsletter:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to subscribe to newsletter" });
+    }
+  });
+
+  app.delete("/api/newsletter/unsubscribe/:email", async (req, res) => {
+    try {
+      const [unsubscribed] = await db
+        .update(newsletterSubscribers)
+        .set({ isActive: false })
+        .where(eq(newsletterSubscribers.email, req.params.email))
+        .returning();
+
+      if (!unsubscribed) {
+        return res.status(404).json({ error: "Subscriber not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error unsubscribing from newsletter:", error);
+      res.status(500).json({ error: "Failed to unsubscribe from newsletter" });
+    }
+  });
+
+  // TAGS API
+  app.get("/api/tags", async (req, res) => {
+    try {
+      const allTags = await db
+        .select()
+        .from(tags)
+        .orderBy(desc(tags.count));
+      res.json(allTags);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      res.status(500).json({ error: "Failed to fetch tags" });
+    }
+  });
+
+  app.post("/api/tags", async (req, res) => {
+    try {
+      const validatedData = insertTagSchema.parse(req.body);
+      const [newTag] = await db.insert(tags).values(validatedData).returning();
+      res.json(newTag);
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create tag" });
+    }
+  });
+
+  // ANALYTICS API
+  app.get("/api/analytics/overview", async (req, res) => {
+    try {
+      // Get total articles
+      const totalArticles = await db.select({ count: sqlOp`count(*)` }).from(articles);
+
+      // Get total views
+      const totalViews = await db
+        .select({ total: sqlOp`sum(${articles.viewCount})` })
+        .from(articles);
+
+      // Get published today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const publishedToday = await db
+        .select({ count: sqlOp`count(*)` })
+        .from(articles)
+        .where(sqlOp`${articles.publishedAt} >= ${today}`);
+
+      // Get average credibility
+      const avgCredibility = await db
+        .select({ avg: sqlOp`avg(${articles.credibilityScore})` })
+        .from(articles);
+
+      res.json({
+        totalArticles: parseInt(totalArticles[0]?.count as string) || 0,
+        totalViews: parseInt(totalViews[0]?.total as string) || 0,
+        publishedToday: parseInt(publishedToday[0]?.count as string) || 0,
+        avgCredibility: parseFloat(avgCredibility[0]?.avg as string) || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching analytics overview:", error);
+      res.status(500).json({ error: "Failed to fetch analytics overview" });
+    }
+  });
+
+  app.get("/api/analytics/top-articles", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const topArticles = await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          viewCount: articles.viewCount,
+          publishedAt: articles.publishedAt,
+          categoryName: categories.name,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.viewCount))
+        .limit(limit);
+
+      res.json(topArticles);
+    } catch (error) {
+      console.error("Error fetching top articles:", error);
+      res.status(500).json({ error: "Failed to fetch top articles" });
+    }
+  });
+
+  app.get("/api/analytics/top-categories", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const topCategories = await db
+        .select({
+          id: categories.id,
+          name: categories.name,
+          slug: categories.slug,
+          color: categories.color,
+          articleCount: sqlOp<number>`count(${articles.id})`,
+          totalViews: sqlOp<number>`sum(${articles.viewCount})`,
+        })
+        .from(categories)
+        .leftJoin(articles, eq(articles.categoryId, categories.id))
+        .groupBy(categories.id)
+        .orderBy(desc(sqlOp`count(${articles.id})`))
+        .limit(limit);
+
+      res.json(topCategories);
+    } catch (error) {
+      console.error("Error fetching top categories:", error);
+      res.status(500).json({ error: "Failed to fetch top categories" });
+    }
+  });
+
+  // SEO ENDPOINTS
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const { generateSitemap } = await import("./lib/sitemap-generator");
+      const sitemap = await generateSitemap(process.env.SITE_URL || "http://localhost:5000");
+      res.header("Content-Type", "application/xml");
+      res.send(sitemap);
+    } catch (error) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  app.get("/news-sitemap.xml", async (req, res) => {
+    try {
+      const { generateNewsSitemap } = await import("./lib/sitemap-generator");
+      const sitemap = await generateNewsSitemap(process.env.SITE_URL || "http://localhost:5000");
+      res.header("Content-Type", "application/xml");
+      res.send(sitemap);
+    } catch (error) {
+      console.error("Error generating news sitemap:", error);
+      res.status(500).send("Error generating news sitemap");
+    }
+  });
+
+  app.get("/robots.txt", async (req, res) => {
+    try {
+      const { generateRobotsTxt } = await import("./lib/sitemap-generator");
+      const robotsTxt = await generateRobotsTxt(process.env.SITE_URL || "http://localhost:5000");
+      res.header("Content-Type", "text/plain");
+      res.send(robotsTxt);
+    } catch (error) {
+      console.error("Error generating robots.txt:", error);
+      res.status(500).send("Error generating robots.txt");
+    }
+  });
+
   app.post("/api/automation/stop", async (req, res) => {
     try {
       const { automationScheduler } = await import("./services/automationScheduler");
@@ -966,6 +1479,118 @@ Disallow: /admin/`;
     } catch (error) {
       console.error("Error starting automation:", error);
       res.status(500).json({ error: "Failed to start automation" });
+    }
+  });
+
+  // IMAGE ENRICHMENT ENDPOINTS
+  app.post("/api/images/enrich/:articleId", async (req, res) => {
+    try {
+      const { imageEnrichmentService } = await import("./services/imageEnrichment");
+      const result = await imageEnrichmentService.enrichArticle(req.params.articleId);
+
+      if (result) {
+        res.json({ success: true, message: "Image added to article" });
+      } else {
+        res.status(500).json({ success: false, error: "Failed to add image" });
+      }
+    } catch (error) {
+      console.error("Error enriching article with image:", error);
+      res.status(500).json({ error: "Failed to enrich article" });
+    }
+  });
+
+  app.post("/api/images/enrich-all", async (req, res) => {
+    try {
+      const { limit } = req.body;
+      const { imageEnrichmentService } = await import("./services/imageEnrichment");
+      const result = await imageEnrichmentService.enrichAllArticles(limit);
+
+      res.json({
+        success: true,
+        ...result
+      });
+    } catch (error) {
+      console.error("Error in bulk image enrichment:", error);
+      res.status(500).json({ error: "Failed to enrich articles" });
+    }
+  });
+
+  app.post("/api/images/replace/:articleId", async (req, res) => {
+    try {
+      const { searchQuery } = req.body;
+      const { imageEnrichmentService } = await import("./services/imageEnrichment");
+      const result = await imageEnrichmentService.replaceArticleImage(
+        req.params.articleId,
+        searchQuery
+      );
+
+      if (result) {
+        res.json({ success: true, message: "Image replaced successfully" });
+      } else {
+        res.status(500).json({ success: false, error: "Failed to replace image" });
+      }
+    } catch (error) {
+      console.error("Error replacing article image:", error);
+      res.status(500).json({ error: "Failed to replace image" });
+    }
+  });
+
+  app.get("/api/images/stats", async (req, res) => {
+    try {
+      const { imageEnrichmentService } = await import("./services/imageEnrichment");
+      const stats = await imageEnrichmentService.getImageStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching image stats:", error);
+      res.status(500).json({ error: "Failed to fetch image stats" });
+    }
+  });
+
+  // MEGA POPULATION SCRIPT - Generate 600+ professional articles
+  app.post("/api/admin/populate-database", async (req, res) => {
+    try {
+      console.log('📊 Starting mega database population...');
+
+      const { populateEntireDatabase } = await import("./lib/mega-population-script");
+      const stats = await populateEntireDatabase();
+
+      res.json({
+        success: true,
+        message: "Database populated successfully",
+        stats
+      });
+    } catch (error) {
+      console.error("Error populating database:", error);
+      res.status(500).json({
+        error: "Failed to populate database",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Populate single category
+  app.post("/api/admin/populate-category", async (req, res) => {
+    try {
+      const { categorySlug, count = 50 } = req.body;
+
+      if (!categorySlug) {
+        return res.status(400).json({ error: "categorySlug is required" });
+      }
+
+      const { populateSingleCategory } = await import("./lib/mega-population-script");
+      const insertedCount = await populateSingleCategory(categorySlug, count);
+
+      res.json({
+        success: true,
+        message: `${insertedCount} articles generated for category: ${categorySlug}`,
+        count: insertedCount
+      });
+    } catch (error) {
+      console.error("Error populating category:", error);
+      res.status(500).json({
+        error: "Failed to populate category",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

@@ -5,42 +5,114 @@ import { translations, categoryTranslations, articles, categories } from "@share
 import type { Translation, CategoryTranslation } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
+// Lazy initialization of database connection
+let db: ReturnType<typeof drizzle> | null = null;
+let ai: GoogleGenAI | null = null;
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY environment variable is required for translation");
+function getDb() {
+  if (!db) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
+    const sql = neon(process.env.DATABASE_URL);
+    db = drizzle(sql);
+  }
+  return db;
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+function getAI() {
+  if (!ai) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY environment variable is required for translation");
+    }
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+  return ai;
+}
 
-// Supported locales with their native names
+// Supported locales with their native names - 50 languages
 export const SUPPORTED_LOCALES = {
-  es: { code: 'es', name: 'Español', nativeName: 'Español', flag: '🇦🇷' },
-  en: { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
-  pt: { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
-  fr: { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  de: { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-  it: { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
-  ja: { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-  zh: { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
-  ru: { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
-  ar: { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  // Primary languages
+  es: { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇦🇷', rtl: false },
+  en: { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', rtl: false },
+  pt: { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', rtl: false },
+  fr: { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', rtl: false },
+  de: { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', rtl: false },
+  it: { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', rtl: false },
+  ja: { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵', rtl: false },
+  zh: { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳', rtl: false },
+  ru: { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺', rtl: false },
+  ar: { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', rtl: true },
+
+  // European languages
+  nl: { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱', rtl: false },
+  pl: { code: 'pl', name: 'Polish', nativeName: 'Polski', flag: '🇵🇱', rtl: false },
+  sv: { code: 'sv', name: 'Swedish', nativeName: 'Svenska', flag: '🇸🇪', rtl: false },
+  da: { code: 'da', name: 'Danish', nativeName: 'Dansk', flag: '🇩🇰', rtl: false },
+  no: { code: 'no', name: 'Norwegian', nativeName: 'Norsk', flag: '🇳🇴', rtl: false },
+  fi: { code: 'fi', name: 'Finnish', nativeName: 'Suomi', flag: '🇫🇮', rtl: false },
+  cs: { code: 'cs', name: 'Czech', nativeName: 'Čeština', flag: '🇨🇿', rtl: false },
+  hu: { code: 'hu', name: 'Hungarian', nativeName: 'Magyar', flag: '🇭🇺', rtl: false },
+  ro: { code: 'ro', name: 'Romanian', nativeName: 'Română', flag: '🇷🇴', rtl: false },
+  el: { code: 'el', name: 'Greek', nativeName: 'Ελληνικά', flag: '🇬🇷', rtl: false },
+
+  // Asian languages
+  ko: { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷', rtl: false },
+  th: { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭', rtl: false },
+  vi: { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳', rtl: false },
+  id: { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩', rtl: false },
+  ms: { code: 'ms', name: 'Malay', nativeName: 'Bahasa Melayu', flag: '🇲🇾', rtl: false },
+  hi: { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳', rtl: false },
+  bn: { code: 'bn', name: 'Bengali', nativeName: 'বাংলা', flag: '🇧🇩', rtl: false },
+  ta: { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳', rtl: false },
+  te: { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳', rtl: false },
+  mr: { code: 'mr', name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳', rtl: false },
+
+  // Middle Eastern languages
+  fa: { code: 'fa', name: 'Persian', nativeName: 'فارسی', flag: '🇮🇷', rtl: true },
+  ur: { code: 'ur', name: 'Urdu', nativeName: 'اردو', flag: '🇵🇰', rtl: true },
+  he: { code: 'he', name: 'Hebrew', nativeName: 'עברית', flag: '🇮🇱', rtl: true },
+  tr: { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', flag: '🇹🇷', rtl: false },
+
+  // Other European
+  uk: { code: 'uk', name: 'Ukrainian', nativeName: 'Українська', flag: '🇺🇦', rtl: false },
+  bg: { code: 'bg', name: 'Bulgarian', nativeName: 'Български', flag: '🇧🇬', rtl: false },
+  sr: { code: 'sr', name: 'Serbian', nativeName: 'Српски', flag: '🇷🇸', rtl: false },
+  hr: { code: 'hr', name: 'Croatian', nativeName: 'Hrvatski', flag: '🇭🇷', rtl: false },
+  sk: { code: 'sk', name: 'Slovak', nativeName: 'Slovenčina', flag: '🇸🇰', rtl: false },
+  sl: { code: 'sl', name: 'Slovenian', nativeName: 'Slovenščina', flag: '🇸🇮', rtl: false },
+
+  // Americas
+  ca: { code: 'ca', name: 'Catalan', nativeName: 'Català', flag: '🇪🇸', rtl: false },
+  eu: { code: 'eu', name: 'Basque', nativeName: 'Euskara', flag: '🇪🇸', rtl: false },
+  gl: { code: 'gl', name: 'Galician', nativeName: 'Galego', flag: '🇪🇸', rtl: false },
+
+  // African languages
+  sw: { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili', flag: '🇰🇪', rtl: false },
+  zu: { code: 'zu', name: 'Zulu', nativeName: 'isiZulu', flag: '🇿🇦', rtl: false },
+  xh: { code: 'xh', name: 'Xhosa', nativeName: 'isiXhosa', flag: '🇿🇦', rtl: false },
+
+  // Additional major languages
+  lt: { code: 'lt', name: 'Lithuanian', nativeName: 'Lietuvių', flag: '🇱🇹', rtl: false },
+  lv: { code: 'lv', name: 'Latvian', nativeName: 'Latviešu', flag: '🇱🇻', rtl: false },
+  et: { code: 'et', name: 'Estonian', nativeName: 'Eesti', flag: '🇪🇪', rtl: false },
+  is: { code: 'is', name: 'Icelandic', nativeName: 'Íslenska', flag: '🇮🇸', rtl: false },
 } as const;
 
 export type SupportedLocale = keyof typeof SUPPORTED_LOCALES;
 
 const LANGUAGE_NAMES: Record<string, string> = {
-  es: 'Spanish',
-  en: 'English',
-  pt: 'Portuguese',
-  fr: 'French',
-  de: 'German',
-  it: 'Italian',
-  ja: 'Japanese',
-  zh: 'Chinese',
-  ru: 'Russian',
-  ar: 'Arabic',
+  es: 'Spanish', en: 'English', pt: 'Portuguese', fr: 'French', de: 'German',
+  it: 'Italian', ja: 'Japanese', zh: 'Chinese', ru: 'Russian', ar: 'Arabic',
+  nl: 'Dutch', pl: 'Polish', sv: 'Swedish', da: 'Danish', no: 'Norwegian',
+  fi: 'Finnish', cs: 'Czech', hu: 'Hungarian', ro: 'Romanian', el: 'Greek',
+  ko: 'Korean', th: 'Thai', vi: 'Vietnamese', id: 'Indonesian', ms: 'Malay',
+  hi: 'Hindi', bn: 'Bengali', ta: 'Tamil', te: 'Telugu', mr: 'Marathi',
+  fa: 'Persian', ur: 'Urdu', he: 'Hebrew', tr: 'Turkish',
+  uk: 'Ukrainian', bg: 'Bulgarian', sr: 'Serbian', hr: 'Croatian',
+  sk: 'Slovak', sl: 'Slovenian', ca: 'Catalan', eu: 'Basque', gl: 'Galician',
+  sw: 'Swahili', zu: 'Zulu', xh: 'Xhosa',
+  lt: 'Lithuanian', lv: 'Latvian', et: 'Estonian', is: 'Icelandic',
 };
 
 interface TranslationResponse {
@@ -75,7 +147,7 @@ ${text}
 Respond ONLY with the translated text, no explanations or comments.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-2.5-flash",
       config: {
         systemInstruction: systemPrompt,
@@ -101,7 +173,8 @@ export async function translateArticle(
   targetLocale: SupportedLocale
 ): Promise<Translation> {
   // Check if translation already exists
-  const [existingTranslation] = await db
+  const database = getDb();
+  const [existingTranslation] = await database
     .select()
     .from(translations)
     .where(
@@ -116,7 +189,7 @@ export async function translateArticle(
   }
 
   // Get original article
-  const [article] = await db
+  const [article] = await database
     .select()
     .from(articles)
     .where(eq(articles.id, articleId));
@@ -133,7 +206,7 @@ export async function translateArticle(
   ]);
 
   // Save translation to database
-  const [newTranslation] = await db
+  const [newTranslation] = await database
     .insert(translations)
     .values({
       articleId,
@@ -152,7 +225,8 @@ export async function translateCategory(
   targetLocale: SupportedLocale
 ): Promise<CategoryTranslation> {
   // Check if translation already exists
-  const [existingTranslation] = await db
+  const database = getDb();
+  const [existingTranslation] = await database
     .select()
     .from(categoryTranslations)
     .where(
@@ -167,7 +241,7 @@ export async function translateCategory(
   }
 
   // Get original category
-  const [category] = await db
+  const [category] = await database
     .select()
     .from(categories)
     .where(eq(categories.id, categoryId));
@@ -183,7 +257,7 @@ export async function translateCategory(
   ]);
 
   // Save translation to database
-  const [newTranslation] = await db
+  const [newTranslation] = await database
     .insert(categoryTranslations)
     .values({
       categoryId,

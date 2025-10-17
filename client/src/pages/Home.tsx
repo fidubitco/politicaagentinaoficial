@@ -11,6 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, TrendingUp, Clock, ArrowRight } from "lucide-react";
 import { LazyImage } from "@/components/LazyImage";
 import { Button } from "@/components/ui/button";
+import { EconomicIndicatorsBanner } from "@/components/EconomicTicker";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { motion } from "framer-motion";
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 interface DolarData {
   oficial: any;
@@ -22,8 +30,37 @@ interface DolarData {
 }
 
 export default function Home() {
+  const heroRef = useRef<HTMLElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
   const siteUrl = import.meta.env.VITE_SITE_URL || "https://politica-argentina.replit.app";
-  
+
+  // GSAP Animations - Entrance Effects
+  useEffect(() => {
+    if (heroRef.current) {
+      gsap.from(heroRef.current, {
+        duration: 1.2,
+        y: 50,
+        opacity: 0,
+        ease: "power3.out"
+      });
+    }
+
+    if (cardsRef.current) {
+      const cards = cardsRef.current.querySelectorAll('.article-card');
+      gsap.from(cards, {
+        duration: 0.8,
+        y: 40,
+        opacity: 0,
+        stagger: 0.15,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: cardsRef.current,
+          start: "top 80%"
+        }
+      });
+    }
+  }, []);
+
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -119,31 +156,20 @@ export default function Home() {
 
       <div className="min-h-screen bg-background">
         <Navbar />
-      
-      {/* Live Breaking News Ticker */}
-      {dolarData && (
-        <div className="bg-[hsl(355,70%,48%)] text-white py-2.5 overflow-hidden relative">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center gap-6">
-            <div className="flex items-center gap-2 font-semibold shrink-0 text-sm">
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-              EN VIVO
-            </div>
-            <div className="flex gap-8 text-sm font-medium">
-              <span>💵 Blue: ${dolarData.blue?.venta?.toLocaleString('es-AR')}</span>
-              <span>🏦 Oficial: ${dolarData.oficial?.venta?.toLocaleString('es-AR')}</span>
-              <span>📊 MEP: ${dolarData.mep?.venta?.toLocaleString('es-AR')}</span>
-              <span>💳 Tarjeta: ${dolarData.tarjeta?.venta?.toLocaleString('es-AR')}</span>
-            </div>
-          </div>
-        </div>
-      )}
+
+        {/* Bloomberg-Style Economic Indicators Ticker */}
+        <EconomicIndicatorsBanner />
 
       <main className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16">
         {/* Hero Section - Immersive Lead Story with Parallax */}
         {featuredArticle && (
-          <section className="py-8 lg:py-12">
+          <section ref={heroRef} className="py-8 lg:py-12">
             <Link href={`/articulo/${featuredArticle.slug}`}>
-              <div className="relative aspect-[16/9] lg:aspect-[21/9] rounded-xl overflow-hidden group cursor-pointer shadow-2xl">
+              <motion.div
+                className="relative aspect-[16/9] lg:aspect-[21/9] rounded-xl overflow-hidden group cursor-pointer shadow-luxury-xl"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
                 <LazyImage 
                   src={featuredArticle.imageUrl || 'https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=1920'}
                   alt={featuredArticle.title}
@@ -153,20 +179,19 @@ export default function Home() {
                   photographerUrl={(featuredArticle.metadata as any)?.photographerUrl}
                   data-testid="img-hero-article"
                 />
-                
-                {/* Dark gradient overlay for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-500"></div>
+
+                {/* Dark gradient overlay for text readability - Luxury Enhanced */}
+                <div className="absolute inset-0 bg-gradient-luxury-mesh opacity-80 group-hover:opacity-70 transition-luxury"></div>
                 
                 {/* Hero Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-12 text-white z-10">
                   <div className="max-w-5xl">
                     {featuredArticle.categoryId && categories && (
-                      <Badge 
-                        style={{ 
-                          backgroundColor: categories.find(c => c.id === featuredArticle.categoryId)?.color || 'hsl(355,70%,48%)',
-                          backdropFilter: 'blur(8px)'
+                      <Badge
+                        style={{
+                          backgroundColor: categories.find(c => c.id === featuredArticle.categoryId)?.color || 'hsl(355,70%,48%)'
                         }}
-                        className="mb-4 text-sm font-bold uppercase tracking-wider shadow-lg"
+                        className="mb-4 text-sm font-bold uppercase tracking-wider shadow-luxury glassmorphism"
                         data-testid="badge-hero-category"
                       >
                         {categories.find(c => c.id === featuredArticle.categoryId)?.name || 'Noticias'}
@@ -194,7 +219,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </Link>
           </section>
         )}
@@ -204,23 +229,27 @@ export default function Home() {
           {/* Main Column - Masonry Grid */}
           <div className="lg:col-span-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold">Últimas Noticias</h2>
-              <Button variant="ghost" className="gap-2" asChild>
+              <h2 className="font-serif text-3xl lg:text-4xl font-bold luxury-gradient bg-clip-text text-transparent">Últimas Noticias</h2>
+              <Button variant="ghost" className="gap-2 hover:text-luxury-royal transition-luxury" asChild>
                 <Link href="/admin">
                   Ver todas <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
             </div>
 
-            {/* Masonry Grid with CSS */}
-            <div className="columns-1 md:columns-2 gap-6 space-y-6">
+            {/* Masonry Grid with CSS - Animated */}
+            <div ref={cardsRef} className="columns-1 md:columns-2 gap-6 space-y-6">
               {latestArticles.map((article, index) => {
                 const category = categories?.find(c => c.id === article.categoryId);
                 const isLarge = index % 4 === 0; // Every 4th card is larger
                 
                 return (
                   <Link key={article.id} href={`/articulo/${article.slug}`}>
-                    <Card className="break-inside-avoid mb-6 hover-elevate active-elevate-2 transition-all duration-300 overflow-hidden group" data-testid={`card-article-${article.slug}`}>
+                    <motion.div
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <Card className="article-card break-inside-avoid mb-6 hover-elevate active-elevate-2 transition-luxury overflow-hidden group glassmorphism shadow-luxury" data-testid={`card-article-${article.slug}`}>
                       <LazyImage 
                         src={article.imageUrl || 'https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=800'}
                         alt={article.title}
@@ -231,14 +260,14 @@ export default function Home() {
                       />
                       <CardContent className="p-5">
                         {category && (
-                          <Badge 
+                          <Badge
                             style={{ backgroundColor: category.color ?? '#6CACE4' }}
-                            className="text-white text-xs font-semibold mb-3"
+                            className="text-white text-xs font-semibold mb-3 shadow-luxury-sm"
                           >
                             {category.name}
                           </Badge>
                         )}
-                        <h3 className={`font-serif font-bold mb-3 line-clamp-2 group-hover:text-[hsl(355,70%,48%)] transition-colors ${isLarge ? 'text-2xl' : 'text-xl'}`}>
+                        <h3 className={`font-serif font-bold mb-3 line-clamp-2 group-hover:text-luxury-royal transition-luxury ${isLarge ? 'text-2xl' : 'text-xl'}`}>
                           {article.title}
                         </h3>
                         {article.summary && (
@@ -261,6 +290,7 @@ export default function Home() {
                         </div>
                       </CardContent>
                     </Card>
+                    </motion.div>
                   </Link>
                 );
               })}
@@ -271,23 +301,28 @@ export default function Home() {
           <div className="lg:col-span-4">
             <div className="sticky top-24 space-y-6">
               {/* Trending Topics */}
-              <Card className="overflow-hidden">
+              <Card className="overflow-hidden glassmorphism shadow-luxury">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-6">
-                    <TrendingUp className="h-5 w-5 text-[hsl(355,70%,48%)]" />
-                    <h3 className="font-serif text-2xl font-bold">Tendencias</h3>
+                    <TrendingUp className="h-5 w-5 text-luxury-royal" />
+                    <h3 className="font-serif text-2xl font-bold luxury-gradient bg-clip-text text-transparent">Tendencias</h3>
                   </div>
                   <div className="space-y-4">
                     {trendingArticles.slice(0, 5).map((article, index) => {
                       const category = categories?.find(c => c.id === article.categoryId);
                       return (
                         <Link key={article.id} href={`/articulo/${article.slug}`}>
-                          <div className="flex gap-4 p-3 rounded-lg hover-elevate active-elevate-2 transition-all" data-testid={`card-trending-${article.slug}`}>
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[hsl(355,70%,48%)] text-white font-bold shrink-0">
+                          <motion.div
+                            className="flex gap-4 p-3 rounded-lg hover-elevate active-elevate-2 transition-luxury glassmorphism"
+                            data-testid={`card-trending-${article.slug}`}
+                            whileHover={{ x: 4 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-luxury-gold text-white font-bold shrink-0 shadow-luxury">
                               {index + 1}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-serif font-bold text-sm line-clamp-2 mb-2 hover:text-[hsl(355,70%,48%)] transition-colors">
+                              <h4 className="font-serif font-bold text-sm line-clamp-2 mb-2 hover:text-luxury-royal transition-luxury">
                                 {article.title}
                               </h4>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -302,7 +337,7 @@ export default function Home() {
                                 <span>{(article.viewCount || 0).toLocaleString('es-AR')} vistas</span>
                               </div>
                             </div>
-                          </div>
+                          </motion.div>
                         </Link>
                       );
                     })}
@@ -312,19 +347,25 @@ export default function Home() {
 
               {/* Categories Quick Access */}
               {categories && categories.length > 0 && (
-                <Card>
+                <Card className="glassmorphism shadow-luxury">
                   <CardContent className="p-6">
-                    <h3 className="font-serif text-xl font-bold mb-4">Categorías</h3>
+                    <h3 className="font-serif text-xl font-bold mb-4 luxury-gradient bg-clip-text text-transparent">Categorías</h3>
                     <div className="flex flex-wrap gap-2">
                       {categories.slice(0, 8).map(category => (
                         <Link key={category.id} href={`/categoria/${category.slug}`}>
-                          <Badge 
-                            style={{ backgroundColor: category.color ?? '#6CACE4' }}
-                            className="text-white hover-elevate cursor-pointer px-3 py-1.5"
-                            data-testid={`badge-category-${category.slug}`}
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            {category.name}
-                          </Badge>
+                            <Badge
+                              style={{ backgroundColor: category.color ?? '#6CACE4' }}
+                              className="text-white hover-elevate cursor-pointer px-3 py-1.5 shadow-luxury-sm"
+                              data-testid={`badge-category-${category.slug}`}
+                            >
+                              {category.name}
+                            </Badge>
+                          </motion.div>
                         </Link>
                       ))}
                     </div>

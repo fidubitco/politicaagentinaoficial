@@ -1,20 +1,14 @@
 import { useState } from "react";
-import { Globe, Check } from "lucide-react";
+import { useLocale, SUPPORTED_LOCALES, SupportedLocale } from "@/contexts/LocaleContext";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/contexts/LocaleContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Globe, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function LanguageSelector() {
-  const { locale, setLocale } = useLocale();
-  const [location, setLocation] = useLocation();
+export function LanguageSwitcher() {
+  const { locale, setLocale, getLocalePath } = useLocale();
+  const [, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLocaleChange = (newLocale: SupportedLocale) => {
@@ -22,25 +16,20 @@ export function LanguageSelector() {
     setIsOpen(false);
 
     // Get current path without locale prefix
-    const pathParts = location.split('/').filter(Boolean);
-    const firstPart = pathParts[0];
+    const currentPath = window.location.pathname;
+    const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}(\/|$)/, '/');
 
-    let basePath = location;
-    if (firstPart && firstPart in SUPPORTED_LOCALES) {
-      // Remove existing locale prefix
-      basePath = '/' + pathParts.slice(1).join('/');
-    }
+    // Navigate to new locale path
+    const newPath = newLocale === 'es' ? pathWithoutLocale : `/${newLocale}${pathWithoutLocale}`;
+    setLocation(newPath);
 
-    // Add new locale prefix (unless it's Spanish - default)
-    const newPath = newLocale === 'es' ? basePath : `/${newLocale}${basePath}`;
-
-    // Force page reload to apply translations automatically
-    window.location.href = newPath || '/';
+    // Reload to apply translation
+    window.location.href = newPath;
   };
 
   const currentLocaleInfo = SUPPORTED_LOCALES[locale];
 
-  // Group locales by region for luxury presentation
+  // Group locales by region
   const localeGroups = {
     "América": ['es', 'en', 'pt'] as SupportedLocale[],
     "Europa": ['fr', 'de', 'it', 'ru'] as SupportedLocale[],
@@ -54,8 +43,7 @@ export function LanguageSelector() {
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 font-medium hover:bg-primary/10 transition-all duration-300 hover-elevate"
-          data-testid="button-language-selector"
+          className="gap-2 font-medium hover:bg-primary/10 transition-all duration-300"
         >
           <Globe className="h-4 w-4" />
           <span className="hidden md:inline">{currentLocaleInfo.flag}</span>
@@ -63,7 +51,8 @@ export function LanguageSelector() {
           <span className="lg:hidden">{currentLocaleInfo.code.toUpperCase()}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-2 bg-card/95 backdrop-blur-xl border-border/50 shadow-2xl">
+
+      <DropdownMenuContent align="end" className="w-80 p-2 bg-card/95 backdrop-blur-xl border-border/50">
         <div className="px-3 py-2 mb-2">
           <p className="text-sm font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Selecciona tu idioma
@@ -104,7 +93,6 @@ export function LanguageSelector() {
                           : 'hover:bg-muted'
                         }
                       `}
-                      data-testid={`language-option-${localeCode}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{localeInfo.flag}</span>
@@ -139,10 +127,44 @@ export function LanguageSelector() {
 
         <div className="px-3 py-2 mt-2 bg-muted/50 rounded-md">
           <p className="text-xs text-muted-foreground">
-            <strong>Traducción automática:</strong> Todo el contenido se traduce instantáneamente a tu idioma preferido.
+            💡 <strong>Traducción automática:</strong> Todo el contenido se traduce instantáneamente a tu idioma preferido.
           </p>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+// Compact version for mobile
+export function LanguageSwitcherCompact() {
+  const { locale, setLocale } = useLocale();
+  const [, setLocation] = useLocation();
+
+  const handleLocaleChange = (newLocale: SupportedLocale) => {
+    setLocale(newLocale);
+
+    const currentPath = window.location.pathname;
+    const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}(\/|$)/, '/');
+    const newPath = newLocale === 'es' ? pathWithoutLocale : `/${newLocale}${pathWithoutLocale}`;
+
+    setLocation(newPath);
+    window.location.href = newPath;
+  };
+
+  return (
+    <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-hide">
+      {Object.values(SUPPORTED_LOCALES).map((localeInfo) => (
+        <Button
+          key={localeInfo.code}
+          variant={locale === localeInfo.code ? "default" : "outline"}
+          size="sm"
+          onClick={() => handleLocaleChange(localeInfo.code)}
+          className="min-w-fit gap-1.5 text-xs"
+        >
+          <span>{localeInfo.flag}</span>
+          <span className="hidden sm:inline">{localeInfo.code.toUpperCase()}</span>
+        </Button>
+      ))}
+    </div>
   );
 }

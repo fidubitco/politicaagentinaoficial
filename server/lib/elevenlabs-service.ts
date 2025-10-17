@@ -1,8 +1,19 @@
 import { ElevenLabsClient } from "elevenlabs";
 
-const elevenlabs = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY,
-});
+// Lazy initialization
+let elevenlabs: ElevenLabsClient | null = null;
+
+function getElevenLabs(): ElevenLabsClient {
+  if (!elevenlabs) {
+    if (!process.env.ELEVENLABS_API_KEY) {
+      throw new Error("ELEVENLABS_API_KEY environment variable is required for audio generation");
+    }
+    elevenlabs = new ElevenLabsClient({
+      apiKey: process.env.ELEVENLABS_API_KEY,
+    });
+  }
+  return elevenlabs;
+}
 
 export interface AudioGenerationOptions {
   text: string;
@@ -18,7 +29,8 @@ export async function generateNewsAudio(options: AudioGenerationOptions): Promis
   } = options;
 
   try {
-    const audio = await elevenlabs.generate({
+    const client = getElevenLabs();
+    const audio = await client.generate({
       voice: voiceId,
       text: text,
       model_id: modelId,

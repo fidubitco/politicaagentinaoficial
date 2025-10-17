@@ -1,0 +1,380 @@
+/**
+ * AETHERIUM DESIGN SYSTEM
+ * Luxury Design Tokens for POLÍTICA ARGENTINA
+ *
+ * Philosophy: "Elegancia Funcional" - Every aesthetic choice serves a functional purpose
+ * Inspired by: Financial Times, Bloomberg, The Economist
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════
+     LUXURY COLOR PALETTE
+     Sophisticated, professional, trustworthy
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Primary - Luxury Blue (Trust & Authority) */
+  --color-luxury-royal: #4169E1;
+  --color-luxury-royal-light: #6495ED;
+  --color-luxury-royal-dark: #1E3A8A;
+
+  /* Accent - Gold (Premium & Excellence) */
+  --color-luxury-gold: #D4AF37;
+  --color-luxury-gold-light: #F4E5C3;
+  --color-luxury-gold-dark: #B8941F;
+
+  /* Neutrals - Sophisticated Grays */
+  --color-luxury-platinum: #E5E4E2;
+  --color-luxury-silver: #C0C0C0;
+  --color-luxury-graphite: #2C3E50;
+  --color-luxury-midnight: #0A0E27;
+  --color-luxury-ivory: #FFFFF0;
+
+  /* Semantic Colors */
+  --color-success: #10B981;
+  --color-error: #DC2626;
+  --color-warning: #F59E0B;
+  --color-info: #3B82F6;
+
+  /* Editorial Red (for breaking news, emphasis) */
+  --color-editorial-red: #DC143C;
+  --color-editorial-red-light: #FF6B6B;
+
+  /* ═══════════════════════════════════════════════════════════════
+     GRADIENTS - Depth & Luxury
+     ═══════════════════════════════════════════════════════════════ */
+
+  --gradient-luxury-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-luxury-gold: linear-gradient(135deg, #D4AF37 0%, #F4E5C3 100%);
+  --gradient-luxury-royal: linear-gradient(135deg, #4169E1 0%, #6495ED 100%);
+  --gradient-luxury-midnight: linear-gradient(135deg, #0A0E27 0%, #1E3A8A 100%);
+
+  /* Glassmorphism */
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  --gradient-glass-dark: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.05));
+
+  /* Mesh Gradients (Modern) */
+  --gradient-mesh-1: radial-gradient(at 40% 20%, hsla(28,100%,74%,0.3) 0px, transparent 50%),
+                      radial-gradient(at 80% 0%, hsla(189,100%,56%,0.3) 0px, transparent 50%),
+                      radial-gradient(at 0% 50%, hsla(355,100%,93%,0.3) 0px, transparent 50%);
+
+  /* ═══════════════════════════════════════════════════════════════
+     TYPOGRAPHY - Professional Editorial
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Font Families */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-editorial: Georgia, 'Times New Roman', serif;
+
+  /* Fluid Typography Scale (clamp for responsive) */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);      /* 12-14px */
+  --text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);        /* 14-16px */
+  --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);        /* 16-18px */
+  --text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);       /* 18-20px */
+  --text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);        /* 20-24px */
+  --text-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);             /* 24-32px */
+  --text-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.5rem);     /* 30-40px */
+  --text-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);         /* 36-48px */
+  --text-5xl: clamp(3rem, 2.5rem + 2.5vw, 4rem);             /* 48-64px */
+  --text-6xl: clamp(3.75rem, 3rem + 3.75vw, 5rem);           /* 60-80px */
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 1.75;
+  --leading-editorial: 1.9;  /* For article body text */
+
+  /* Font Weights */
+  --weight-thin: 100;
+  --weight-light: 300;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+  --weight-black: 900;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SPACING - 8pt Grid System
+     ═══════════════════════════════════════════════════════════════ */
+
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;   /* 2px */
+  --space-1: 0.25rem;      /* 4px */
+  --space-1-5: 0.375rem;   /* 6px */
+  --space-2: 0.5rem;       /* 8px */
+  --space-2-5: 0.625rem;   /* 10px */
+  --space-3: 0.75rem;      /* 12px */
+  --space-3-5: 0.875rem;   /* 14px */
+  --space-4: 1rem;         /* 16px */
+  --space-5: 1.25rem;      /* 20px */
+  --space-6: 1.5rem;       /* 24px */
+  --space-7: 1.75rem;      /* 28px */
+  --space-8: 2rem;         /* 32px */
+  --space-9: 2.25rem;      /* 36px */
+  --space-10: 2.5rem;      /* 40px */
+  --space-11: 2.75rem;     /* 44px */
+  --space-12: 3rem;        /* 48px */
+  --space-14: 3.5rem;      /* 56px */
+  --space-16: 4rem;        /* 64px */
+  --space-20: 5rem;        /* 80px */
+  --space-24: 6rem;        /* 96px */
+  --space-28: 7rem;        /* 112px */
+  --space-32: 8rem;        /* 128px */
+  --space-36: 9rem;        /* 144px */
+  --space-40: 10rem;       /* 160px */
+  --space-44: 11rem;       /* 176px */
+  --space-48: 12rem;       /* 192px */
+  --space-52: 13rem;       /* 208px */
+  --space-56: 14rem;       /* 224px */
+  --space-60: 15rem;       /* 240px */
+  --space-64: 16rem;       /* 256px */
+  --space-72: 18rem;       /* 288px */
+  --space-80: 20rem;       /* 320px */
+  --space-96: 24rem;       /* 384px */
+
+  /* ═══════════════════════════════════════════════════════════════
+     SHADOWS - Luxury Depth & Elevation
+     ═══════════════════════════════════════════════════════════════ */
+
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Luxury Shadows */
+  --shadow-luxury: 0 30px 60px rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.2);
+  --shadow-luxury-sm: 0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+
+  /* Colored Shadows */
+  --shadow-royal: 0 10px 30px rgba(65, 105, 225, 0.3);
+  --shadow-gold: 0 10px 30px rgba(212, 175, 55, 0.3);
+
+  /* Inner Shadows */
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-inner-lg: inset 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+
+  /* ═══════════════════════════════════════════════════════════════
+     BORDERS & RADIUS
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;    /* 2px */
+  --radius-md: 0.375rem;    /* 6px */
+  --radius-lg: 0.5rem;      /* 8px */
+  --radius-xl: 0.75rem;     /* 12px */
+  --radius-2xl: 1rem;       /* 16px */
+  --radius-3xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;
+
+  /* Border Widths */
+  --border-0: 0;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  --border-8: 8px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     EFFECTS - Blur, Backdrop, etc.
+     ═══════════════════════════════════════════════════════════════ */
+
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(16px);
+  --blur-xl: blur(24px);
+  --blur-2xl: blur(40px);
+  --blur-3xl: blur(64px);
+
+  /* Backdrop Filters (Glassmorphism) */
+  --backdrop-blur-sm: blur(4px);
+  --backdrop-blur-md: blur(12px);
+  --backdrop-blur-lg: blur(20px);
+  --backdrop-blur-xl: blur(40px);
+
+  /* ═══════════════════════════════════════════════════════════════
+     ANIMATIONS & TRANSITIONS
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Durations */
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+
+  /* Easing Functions */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Luxury Easings */
+  --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);           /* Smooth acceleration */
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);  /* Bounce effect */
+  --ease-elastic: cubic-bezier(0.25, 0.46, 0.45, 0.94);   /* Elastic effect */
+
+  /* Predefined Transitions */
+  --transition-fast: var(--duration-150) var(--ease-out);
+  --transition-base: var(--duration-200) var(--ease-in-out);
+  --transition-slow: var(--duration-300) var(--ease-in-out);
+  --transition-luxury: var(--duration-500) var(--ease-luxury);
+
+  /* ═══════════════════════════════════════════════════════════════
+     Z-INDEX SCALE - Layering Hierarchy
+     ═══════════════════════════════════════════════════════════════ */
+
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+  --z-60: 60;
+  --z-70: 70;
+  --z-80: 80;
+  --z-90: 90;
+  --z-100: 100;
+
+  /* Semantic Z-Index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ═══════════════════════════════════════════════════════════════
+     BREAKPOINTS (For reference in JS)
+     ═══════════════════════════════════════════════════════════════ */
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     CONTAINER WIDTHS
+     ═══════════════════════════════════════════════════════════════ */
+
+  --container-xs: 320px;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  --container-full: 100%;
+
+  /* Content max-widths for readability */
+  --content-narrow: 640px;   /* For text-heavy content */
+  --content-normal: 768px;   /* For articles */
+  --content-wide: 1024px;    /* For mixed content */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"],
+.dark {
+  --color-luxury-royal: #6495ED;
+  --color-luxury-royal-light: #87CEEB;
+  --color-luxury-royal-dark: #4169E1;
+
+  --color-luxury-gold: #F4E5C3;
+  --color-luxury-gold-light: #FFF8DC;
+  --color-luxury-gold-dark: #D4AF37;
+
+  --color-luxury-graphite: #E5E4E2;
+  --color-luxury-midnight: #F8F9FA;
+  --color-luxury-ivory: #1A1A1A;
+
+  /* Adjust shadows for dark mode */
+  --shadow-luxury: 0 30px 60px rgba(0, 0, 0, 0.6), 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════ */
+
+.luxury-gradient {
+  background: var(--gradient-luxury-primary);
+}
+
+.luxury-gradient-gold {
+  background: var(--gradient-luxury-gold);
+}
+
+.luxury-gradient-royal {
+  background: var(--gradient-luxury-royal);
+}
+
+.luxury-shadow {
+  box-shadow: var(--shadow-luxury);
+}
+
+.luxury-shadow-sm {
+  box-shadow: var(--shadow-luxury-sm);
+}
+
+.glassmorphism {
+  background: var(--gradient-glass);
+  backdrop-filter: var(--backdrop-blur-lg);
+  -webkit-backdrop-filter: var(--backdrop-blur-lg);
+}
+
+.editorial-text {
+  font-family: var(--font-editorial);
+  line-height: var(--leading-editorial);
+  text-align: justify;
+}
+
+.luxury-transition {
+  transition: all var(--transition-luxury);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Focus visible states */
+:focus-visible {
+  outline: 2px solid var(--color-luxury-royal);
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-luxury-royal: #0000FF;
+    --color-luxury-gold: #FFD700;
+  }
+}

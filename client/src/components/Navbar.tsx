@@ -25,21 +25,21 @@ export default function Navbar() {
     .slice(0, 6) || [];
 
   return (
-    <nav className="sticky top-0 z-50 bg-background border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-luxury-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo - Editorial Style */}
+          {/* Logo - Luxury Editorial Style */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-serif font-bold text-foreground tracking-tight">
+            <h1 className="text-2xl font-serif font-bold luxury-gradient bg-clip-text text-transparent tracking-tight">
               POLÍTICA ARGENTINA
             </h1>
           </div>
 
-          {/* Desktop Navigation - Clean Editorial */}
+          {/* Desktop Navigation - Luxury Editorial */}
           <div className="hidden md:flex items-center gap-1">
             <Button
               variant="ghost"
-              className="text-sm font-medium hover-elevate"
+              className="text-sm font-medium hover-elevate transition-luxury hover:text-luxury-royal"
               data-testid="nav-home"
               asChild
             >
@@ -49,7 +49,7 @@ export default function Navbar() {
               <Button
                 key={cat.id}
                 variant="ghost"
-                className="text-sm font-medium hover-elevate"
+                className="text-sm font-medium hover-elevate transition-luxury hover:text-luxury-royal"
                 data-testid={`nav-${cat.slug}`}
                 asChild
               >
@@ -58,7 +58,7 @@ export default function Navbar() {
             ))}
             <Button
               variant="ghost"
-              className="text-sm font-medium hover-elevate"
+              className="text-sm font-medium hover-elevate transition-luxury hover:text-luxury-royal"
               data-testid="nav-about"
               asChild
             >
@@ -66,7 +66,7 @@ export default function Navbar() {
             </Button>
             <Button
               variant="ghost"
-              className="text-sm font-medium hover-elevate"
+              className="text-sm font-medium hover-elevate transition-luxury hover:text-luxury-royal"
               data-testid="nav-contact"
               asChild
             >
@@ -74,19 +74,19 @@ export default function Navbar() {
             </Button>
           </div>
 
-          {/* Search Bar - Professional */}
+          {/* Search Bar - Luxury Professional */}
           <div className="hidden md:flex items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-luxury" />
               <Input
                 type="search"
                 placeholder={t('nav.search')}
-                className="pl-10 w-56 border-border"
+                className="pl-10 w-56 border-border/50 focus:border-luxury-royal transition-luxury glassmorphism"
                 data-testid="input-search"
               />
             </div>
             <LanguageSelector />
-            <Button variant="outline" size="sm" className="gap-2" data-testid="button-admin" asChild>
+            <Button variant="outline" size="sm" className="gap-2 glassmorphism border-luxury-royal/30 hover:bg-luxury-royal/10 transition-luxury" data-testid="button-admin" asChild>
               <Link href="/admin">
                 <Settings className="h-4 w-4" />
                 {t('nav.admin')}

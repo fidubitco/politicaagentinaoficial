@@ -121,3 +121,153 @@ export const insertCategoryTranslationSchema = createInsertSchema(categoryTransl
 
 export type InsertCategoryTranslation = z.infer<typeof insertCategoryTranslationSchema>;
 export type CategoryTranslation = typeof categoryTranslations.$inferSelect;
+
+// Comments System
+export const comments = pgTable("comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  articleId: varchar("article_id").references(() => articles.id).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  authorName: text("author_name").notNull(),
+  authorEmail: text("author_email").notNull(),
+  content: text("content").notNull(),
+  parentId: varchar("parent_id").references(() => comments.id),
+  isApproved: boolean("is_approved").default(false).notNull(),
+  likes: integer("likes").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCommentSchema = createInsertSchema(comments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type Comment = typeof comments.$inferSelect;
+
+// Article Analytics
+export const articleAnalytics = pgTable("article_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  articleId: varchar("article_id").references(() => articles.id).notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  views: integer("views").default(0).notNull(),
+  uniqueViews: integer("unique_views").default(0).notNull(),
+  avgTimeSpent: integer("avg_time_spent").default(0).notNull(), // in seconds
+  bounceRate: integer("bounce_rate").default(0).notNull(), // percentage
+  shares: jsonb("shares").default({}), // {facebook: 10, twitter: 5, etc}
+  referrers: jsonb("referrers").default({}), // {google: 50, direct: 30, etc}
+});
+
+export const insertArticleAnalyticsSchema = createInsertSchema(articleAnalytics).omit({
+  id: true,
+  date: true,
+});
+
+export type InsertArticleAnalytics = z.infer<typeof insertArticleAnalyticsSchema>;
+export type ArticleAnalytics = typeof articleAnalytics.$inferSelect;
+
+// Trending Topics
+export const trendingTopics = pgTable("trending_topics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  keyword: text("keyword").notNull().unique(),
+  count: integer("count").default(1).notNull(),
+  sentiment: integer("sentiment").default(0).notNull(), // -100 to 100
+  relatedArticles: jsonb("related_articles").default([]),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTrendingTopicSchema = createInsertSchema(trendingTopics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTrendingTopic = z.infer<typeof insertTrendingTopicSchema>;
+export type TrendingTopic = typeof trendingTopics.$inferSelect;
+
+// Bookmarks
+export const bookmarks = pgTable("bookmarks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  articleId: varchar("article_id").references(() => articles.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertBookmarkSchema = createInsertSchema(bookmarks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertBookmark = z.infer<typeof insertBookmarkSchema>;
+export type Bookmark = typeof bookmarks.$inferSelect;
+
+// Notifications
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // breaking_news, article_published, comment_reply, etc
+  link: text("link"),
+  isRead: boolean("is_read").default(false).notNull(),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+
+// Newsletter Subscribers
+export const newsletterSubscribers = pgTable("newsletter_subscribers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  isActive: boolean("is_active").default(true).notNull(),
+  preferences: jsonb("preferences").default({}), // categories, frequency, etc
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertNewsletterSubscriberSchema = createInsertSchema(newsletterSubscribers).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscriberSchema>;
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+
+// Article Tags (Many-to-Many)
+export const tags = pgTable("tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  count: integer("count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTagSchema = createInsertSchema(tags).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTag = z.infer<typeof insertTagSchema>;
+export type Tag = typeof tags.$inferSelect;
+
+export const articleTags = pgTable("article_tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  articleId: varchar("article_id").references(() => articles.id).notNull(),
+  tagId: varchar("tag_id").references(() => tags.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertArticleTagSchema = createInsertSchema(articleTags).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertArticleTag = z.infer<typeof insertArticleTagSchema>;
+export type ArticleTag = typeof articleTags.$inferSelect;

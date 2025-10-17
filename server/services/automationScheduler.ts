@@ -1,14 +1,24 @@
 import cron, { type ScheduledTask } from 'node-cron';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { neon, neonConfig } from '@neondatabase/serverless';
+import { neon } from '@neondatabase/serverless';
 import { articles, categories } from '@shared/schema';
 import { autonomousContentGenerator } from './autonomousContentGenerator';
 import { eq, lt, and, isNull } from 'drizzle-orm';
 import { imageSearchService } from './imageSearch';
 
-neonConfig.fetchConnectionCache = true;
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
+// Lazy initialization of database
+let db: ReturnType<typeof drizzle> | null = null;
+
+function getDb() {
+  if (!db) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
+    const sql = neon(process.env.DATABASE_URL);
+    db = drizzle(sql);
+  }
+  return db;
+}
 
 export class AutomationScheduler {
   private tasks: ScheduledTask[] = [];
@@ -35,7 +45,7 @@ export class AutomationScheduler {
       console.log('🔄 Starting automated article generation...');
       
       try {
-        const allCategories = await db.select().from(categories);
+        const allCategories = await getDb().select().from(categories);
         
         const mainCategories = allCategories
           .filter(cat => ['Política Nacional', 'Economía', 'Justicia'].includes(cat.name))
@@ -52,7 +62,7 @@ export class AutomationScheduler {
 
             const enrichedArticle = await autonomousContentGenerator.enrichArticleWithImage(articleData);
 
-            await db.insert(articles).values({
+            await getDb().insert(articles).values({
               ...enrichedArticle,
               categoryId: category.id,
               status: 'published'
@@ -153,7 +163,7 @@ export class AutomationScheduler {
     console.log(`🚀 Manual generation triggered for ${category || 'all categories'}`);
     
     try {
-      const allCategories = await db.select().from(categories);
+      const allCategories = await getDb().select().from(categories);
       
       const targetCategories = category 
         ? allCategories.filter(cat => cat.name === category)
@@ -168,7 +178,7 @@ export class AutomationScheduler {
 
           const enrichedArticle = await autonomousContentGenerator.enrichArticleWithImage(articleData);
 
-          await db.insert(articles).values({
+          await getDb().insert(articles).values({
             ...enrichedArticle,
             categoryId: cat.id,
             status: 'published'

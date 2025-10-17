@@ -41,9 +41,7 @@ export class ImageSearchService {
 
   constructor() {
     this.apiKey = process.env.PEXELS_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn('⚠️ PEXELS_API_KEY no encontrada. Las búsquedas de imágenes fallarán.');
-    }
+    // Silently handle missing API key - fallback images will be used
   }
 
   /**
@@ -116,8 +114,16 @@ export class ImageSearchService {
     orientation: 'landscape' | 'portrait' | 'square' = 'landscape'
   ): Promise<ImageSearchResult | null> {
     if (!this.apiKey) {
-      console.error('❌ PEXELS_API_KEY no disponible');
-      return null;
+      // Return fallback image instead of null
+      return {
+        url: this.getFallbackImage(category),
+        thumbnail: this.getFallbackImage(category),
+        alt: title,
+        photographer: 'Pexels',
+        photographerUrl: 'https://www.pexels.com',
+        width: 1200,
+        height: 800,
+      };
     }
 
     try {

@@ -1,8 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
 import type { InsertArticle } from "@shared/schema";
 import { imageSearchService } from "../services/imageSearch";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+import { generateLocalArticle, generateAuthor, calculateCredibilityScore, generateViewCount } from "./local-article-generator";
 
 interface ArticleGenerationConfig {
   categoryId: string;
@@ -12,85 +10,302 @@ interface ArticleGenerationConfig {
 }
 
 const CATEGORY_TEMPLATES = {
-  "Política Nacional": [
-    "Análisis de última sesión del Congreso sobre {tema}",
-    "Conflicto político entre {actor1} y {actor2} por {tema}",
-    "Nueva estrategia del gobierno para {tema}",
-    "Oposición cuestiona medidas sobre {tema}",
-    "Encuesta revela opinión pública sobre {tema}",
+  "Casa Rosada": [
+    "Presidente anuncia medidas sobre {tema} desde Casa Rosada",
+    "Gabinete nacional debate estrategia para {tema}",
+    "Vocero presidencial confirma postura oficial sobre {tema}",
+    "Decreto del Ejecutivo regula {tema}",
+    "Cumbre en Casa Rosada define política de {tema}",
+    "Presidente recibe a {actor1} para tratar {tema}",
+    "Jefe de Gabinete defiende decisión sobre {tema}",
+    "Casa Rosada desmiente versiones sobre {tema}",
+    "Gobierno nacional lanza plan integral de {tema}",
+    "Mensaje presidencial aborda crisis de {tema}",
+    "Reforma del Ejecutivo modifica {tema}",
+    "Presidente viaja a {provincia} para anunciar {tema}",
+    "Casa Rosada convoca al diálogo sobre {tema}",
+    "Ministros coordinan acciones para {tema}",
+    "Poder Ejecutivo envía proyecto sobre {tema} al Congreso",
   ],
-  "Economía": [
-    "Impacto económico de {tema} en Argentina",
-    "Mercados reaccionan a {tema}",
-    "Análisis del dólar y {tema}",
-    "Inflación y su relación con {tema}",
-    "Inversores evalúan {tema}",
-  ],
-  "Internacional": [
-    "Argentina y {país} negocian sobre {tema}",
-    "Impacto global de {tema} en Latinoamérica",
-    "Comunidad internacional opina sobre {tema}",
-    "Relaciones diplomáticas argentinas con {país} por {tema}",
+  "Congreso": [
+    "Senado aprueba proyecto de ley sobre {tema}",
+    "Diputados debate modificaciones a {tema}",
+    "Comisión bicameral analiza {tema}",
+    "Oposición presenta proyecto alternativo sobre {tema}",
+    "Legisladores alcanzan consenso sobre {tema}",
+    "Sesión extraordinaria tratará {tema}",
+    "Bloque oficialista impulsa {tema} en Congreso",
+    "Senadores cuestionan falta de avances en {tema}",
+    "Diputados aprueban por amplia mayoría {tema}",
+    "Debate parlamentario sobre {tema} genera tensión",
+    "Congreso cita a ministros por {tema}",
+    "Comisión de {tema} emite dictamen favorable",
+    "Legisladores de {provincia} reclaman por {tema}",
+    "Sesión maratónica define futuro de {tema}",
+    "Congreso sanciona ley histórica sobre {tema}",
   ],
   "Justicia": [
-    "Nuevo fallo judicial sobre {tema}",
-    "Causa judicial por {tema} avanza en tribunales",
-    "Fiscalía investiga {tema}",
-    "Defensa presenta alegatos en caso {tema}",
+    "Corte Suprema falla sobre {tema}",
+    "Fiscalía Federal investiga causa de {tema}",
+    "Juez ordena medidas cautelares por {tema}",
+    "Tribunal Oral avanza en juicio sobre {tema}",
+    "Defensa apela fallo en caso {tema}",
+    "Procurador General se expide sobre {tema}",
+    "Cámara Federal confirma procesamiento por {tema}",
+    "Peritos presentan informe clave en caso {tema}",
+    "Fiscalía pide prisión preventiva en causa {tema}",
+    "Querella amplía denuncia por {tema}",
+    "Corte declara inconstitucional {tema}",
+    "Juicio oral por {tema} comienza próxima semana",
+    "Defensoría del Pueblo interviene en {tema}",
+    "Suprema Corte provincial se expide sobre {tema}",
+    "Casación revoca condena en caso {tema}",
+  ],
+  "Economía": [
+    "Dólar registra nueva volatilidad por {tema}",
+    "Banco Central interviene ante {tema}",
+    "FMI evalúa impacto de {tema} en Argentina",
+    "Mercados reaccionan con cautela a {tema}",
+    "Inflación acelera debido a {tema}",
+    "Ministerio de Economía anuncia medidas sobre {tema}",
+    "Exportaciones afectadas por {tema}",
+    "Inversores extranjeros analizan {tema}",
+    "Bonos soberanos caen ante {tema}",
+    "Reservas del BCRA impactadas por {tema}",
+    "Cepo cambiario se endurece por {tema}",
+    "Tasas de interés suben ante {tema}",
+    "Déficit fiscal crece debido a {tema}",
+    "Acuerdo con FMI condiciona {tema}",
+    "Dólar blue alcanza récord por {tema}",
   ],
   "Provincias": [
-    "Gobierno provincial de {provincia} anuncia medidas sobre {tema}",
-    "Conflicto en {provincia} por {tema}",
+    "Gobernador de {provincia} anuncia plan sobre {tema}",
+    "Legislatura provincial aprueba {tema}",
+    "Intendentes reclaman a Nación por {tema}",
+    "Conflicto entre provincia y Nación por {tema}",
+    "Obras públicas en {provincia} contemplan {tema}",
+    "Coparticipación federal afecta {tema} en provincias",
+    "Cumbre de gobernadores debate {tema}",
     "Desarrollo regional en {provincia}: {tema}",
+    "{provincia} lidera innovación en {tema}",
+    "Crisis en {provincia} por falta de fondos para {tema}",
+    "Gobernador viaja a Casa Rosada para tratar {tema}",
+    "Consejo Federal analiza {tema}",
+    "Reforma provincial modifica {tema}",
+    "Municipios de {provincia} reclaman por {tema}",
+    "Acuerdo interprovincial sobre {tema}",
   ],
-  "Sociedad": [
-    "Movimientos sociales se movilizan por {tema}",
-    "Debate público sobre {tema}",
-    "Nuevo estudio revela datos sobre {tema}",
+  "Municipios": [
+    "Intendente lanza programa municipal de {tema}",
+    "Concejo Deliberante debate ordenanza sobre {tema}",
+    "Municipios reclaman fondos para {tema}",
+    "Gestión local implementa {tema} con éxito",
+    "Intendentes se reúnen para coordinar {tema}",
+    "Obras municipales priorizan {tema}",
+    "Secretaría comunal informa sobre {tema}",
+    "Vecinos participan en audiencia pública por {tema}",
+    "Municipio firma convenio sobre {tema}",
+    "Descentralización permite avances en {tema}",
+    "Comuna lidera ranking nacional en {tema}",
+    "Intendente inaugura centro de {tema}",
+    "Protesta vecinal por demoras en {tema}",
+    "Municipio recibe premio por gestión de {tema}",
+    "Plan estratégico municipal contempla {tema}",
+  ],
+  "Internacional": [
+    "Argentina y {país} firman acuerdo sobre {tema}",
+    "Cumbre presidencial aborda {tema}",
+    "Mercosur debate posición conjunta sobre {tema}",
+    "Relaciones con {país} se tensan por {tema}",
+    "Embajador argentino presenta credenciales en {país} para tratar {tema}",
+    "Organización internacional reconoce a Argentina por {tema}",
+    "Gira presidencial por {país} incluye {tema}",
+    "Comunidad internacional pide a Argentina sobre {tema}",
+    "Tratado bilateral con {país} regula {tema}",
+    "Argentina asume presidencia del grupo sobre {tema}",
+    "Cancillería emite comunicado sobre {tema} internacional",
+    "Visita de mandatario de {país} aborda {tema}",
+    "Argentina se posiciona en la ONU sobre {tema}",
+    "Relaciones comerciales con {país} impactan {tema}",
+    "Diplomacia argentina negocia {tema} con {país}",
+  ],
+  "Seguridad": [
+    "Fuerzas federales intervienen en operativo contra {tema}",
+    "Ministerio de Seguridad anuncia plan para {tema}",
+    "Gendarmería refuerza presencia por {tema}",
+    "Policía Federal desbarata organización de {tema}",
+    "Defensa Nacional adapta estrategia ante {tema}",
+    "Protocolo de seguridad se actualiza para {tema}",
+    "Ciberdelito: nuevas medidas contra {tema}",
+    "Fronteras se blindan ante {tema}",
+    "Capacitación de fuerzas en {tema}",
+    "Cooperación internacional combate {tema}",
+    "Tecnología de seguridad mejora control de {tema}",
+    "Ministerio lanza app para denunciar {tema}",
+    "Operativo conjunto desactiva {tema}",
+    "Informe oficial revela datos sobre {tema}",
+    "Seguridad pública prioriza prevención de {tema}",
+  ],
+  "Energía": [
+    "Vaca Muerta alcanza récord en producción de {tema}",
+    "Tarifas de {tema} se actualizan",
+    "Inversión energética prioriza {tema}",
+    "Renovables: Argentina avanza en {tema}",
+    "YPF anuncia proyecto sobre {tema}",
+    "Subsidios energéticos impactan {tema}",
+    "Matriz energética argentina incluye {tema}",
+    "Gasoducto nuevo transportará {tema}",
+    "Energía eólica crece gracias a {tema}",
+    "Solar: nueva planta generará {tema}",
+    "Litio: producción nacional de {tema} crece",
+    "Hidrocarburos: regulación de {tema}",
+    "Eficiencia energética mejora {tema}",
+    "Exportación de gas vinculada a {tema}",
+    "Transición energética contempla {tema}",
+  ],
+  "Educación": [
+    "Universidades nacionales debaten {tema}",
+    "Ministerio de Educación lanza programa de {tema}",
+    "Docentes reclaman mejoras en {tema}",
+    "Reforma educativa incluye {tema}",
+    "CONICET presenta avances en {tema}",
+    "Conectividad: escuelas reciben {tema}",
+    "Evaluación nacional mide {tema}",
+    "Becas para estudiantes contemplan {tema}",
+    "Educación técnica incorpora {tema}",
+    "Nivel inicial prioriza {tema}",
+    "Secundario: nuevos contenidos sobre {tema}",
+    "Alfabetización digital mejora {tema}",
+    "Infraestructura escolar necesita {tema}",
+    "Educación superior debate {tema}",
+    "Paritarias docentes incluyen {tema}",
   ],
   "Opinión": [
     "Columna: La verdad detrás de {tema}",
     "Editorial: ¿Hacia dónde va {tema}?",
     "Análisis experto: {tema} y sus consecuencias",
+    "Perspectiva: El futuro de {tema} en Argentina",
+    "Reflexión: {tema} y la democracia",
+    "Debate: Diferentes miradas sobre {tema}",
+    "Opinión: El impacto social de {tema}",
+    "Punto de vista: {tema} en contexto histórico",
+    "Ensayo: La complejidad de {tema}",
+    "Mirada crítica: {tema} y el poder",
+    "Análisis político: {tema} divide aguas",
+    "Carta abierta sobre {tema}",
+    "Voces: Ciudadanos opinan sobre {tema}",
+    "Editorial: La urgencia de {tema}",
+    "Columna: {tema} requiere consenso nacional",
+  ],
+  "Datos y Visualizaciones": [
+    "Infografía: evolución de {tema} en Argentina",
+    "Datos: radiografía del {tema}",
+    "Mapa interactivo: {tema} por provincia",
+    "Estadísticas revelan realidad de {tema}",
+    "Gráfico: tendencia histórica de {tema}",
+    "Visualización: impacto regional de {tema}",
+    "Números: presupuesto destinado a {tema}",
+    "Dashboard: monitoreo en tiempo real de {tema}",
+    "Indicadores económicos sobre {tema}",
+    "Comparativa internacional de {tema}",
+    "Timeline: cronología del {tema}",
+    "Análisis cuantitativo de {tema}",
+    "Big data revela patrones en {tema}",
+    "Estudio: correlación entre {tema} y desarrollo",
+    "Visualización 3D: distribución de {tema}",
   ],
 };
 
 const TEMAS_POR_CATEGORIA = {
-  "Política Nacional": [
-    "reforma previsional", "presupuesto 2025", "elecciones provinciales",
-    "reforma judicial", "seguridad pública", "decreto presidencial",
-    "sesiones extraordinarias", "acuerdo político multipartidario",
-    "crisis de gabinete", "reforma electoral", "veto presidencial",
-    "conflicto con provincias", "reforma tributaria", "política energética",
+  "Casa Rosada": [
+    "reforma previsional", "presupuesto 2025", "decreto de necesidad y urgencia",
+    "gira presidencial", "cumbre bilateral", "acuerdo político", "veto presidencial",
+    "reforma del Estado", "reestructuración de ministerios", "política exterior",
+    "agenda legislativa", "mensaje al Congreso", "nombramientos oficiales",
+    "crisis de gabinete", "política de seguridad", "plan económico nacional",
+    "relaciones institucionales", "diálogo social", "política energética",
+    "acuerdo con gobernadores", "reforma tributaria", "política sanitaria",
+    "digitalización del Estado", "transparencia gubernamental", "combate a la corrupción",
   ],
-  "Economía": [
-    "tipo de cambio", "inflación mensual", "déficit fiscal",
-    "inversión extranjera", "reservas del BCRA", "bonos soberanos",
-    "acuerdo con FMI", "exportaciones agropecuarias", "tasas de interés",
-    "cepo cambiario", "blanqueo de capitales", "reforma impositiva",
-  ],
-  "Internacional": [
-    "Brasil", "Chile", "Uruguay", "Estados Unidos", "China", "UE",
-    "Mercosur", "cumbre presidencial", "relaciones comerciales",
-    "deuda externa", "Venezuela", "México", "España",
+  "Congreso": [
+    "reforma previsional", "presupuesto nacional", "ley de emergencia",
+    "sesión extraordinaria", "debate parlamentario", "comisión bicameral",
+    "acuerdo entre bloques", "dictamen de mayoría", "veto legislativo",
+    "juicio político", "interpelación ministerial", "reforma electoral",
+    "ley de alquileres", "reforma laboral", "ley de medios",
+    "financiamiento político", "presupuesto universitario", "obra pública",
+    "acuerdo con el FMI", "tratado internacional", "régimen promocional",
+    "ley de educación", "código procesal", "reforma judicial",
   ],
   "Justicia": [
-    "corrupción estatal", "causa de lavado de dinero", "reforma procesal",
-    "narcotráfico", "trata de personas", "juicio oral y público",
-    "prisión preventiva", "libertad condicional", "Corte Suprema",
+    "corrupción estatal", "lavado de dinero", "narcotráfico",
+    "reforma procesal", "prisión preventiva", "libertad condicional",
+    "juicio oral", "Corte Suprema", "fuero federal",
+    "causa AMIA", "megacausa", "expropiación", "hábeas corpus",
+    "derechos humanos", "femicidio", "ciberdelito", "trata de personas",
+    "violencia de género", "fraude electoral", "espionaje ilegal",
+    "deuda externa", "arbitraje internacional", "extradición",
+  ],
+  "Economía": [
+    "dólar blue", "dólar oficial", "inflación mensual", "déficit fiscal",
+    "reservas del BCRA", "bonos soberanos", "riesgo país", "tasas de interés",
+    "cepo cambiario", "acuerdo con FMI", "exportaciones", "importaciones",
+    "balanza comercial", "inversión extranjera", "blanqueo de capitales",
+    "reforma impositiva", "ganancias cuarta categoría", "IVA",
+    "retenciones agropecuarias", "tarifas de servicios", "salario mínimo",
+    "paritarias", "inflación núcleo", "canasta básica", "PBI",
   ],
   "Provincias": [
-    "Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán",
-    "infraestructura vial", "coparticipación federal", "obras públicas",
+    "Buenos Aires", "Córdoba", "Santa Fe", "Mendoza", "Tucumán", "Entre Ríos",
+    "Salta", "Jujuy", "San Juan", "La Rioja", "Catamarca", "Santiago del Estero",
+    "coparticipación federal", "obras públicas", "infraestructura vial",
+    "desarrollo productivo", "política tributaria provincial", "recursos naturales",
+    "minería", "turismo provincial", "salud pública", "educación provincial",
   ],
-  "Sociedad": [
-    "educación pública", "salud mental", "vivienda social",
-    "derechos humanos", "medio ambiente", "cambio climático",
-    "género y diversidad", "pueblos originarios",
+  "Municipios": [
+    "gestión de residuos", "transporte público", "seguridad municipal",
+    "obras de infraestructura", "alumbrado público", "espacios verdes",
+    "ordenamiento territorial", "desarrollo urbano", "tasas municipales",
+    "tránsito y movilidad", "cultura comunitaria", "deportes municipales",
+    "presupuesto participativo", "audiencias públicas", "descentralización",
+  ],
+  "Internacional": [
+    "Brasil", "Chile", "Uruguay", "Estados Unidos", "China", "Rusia",
+    "Unión Europea", "España", "México", "Venezuela", "Bolivia",
+    "Mercosur", "CELAC", "G20", "ONU", "OEA", "FMI",
+    "acuerdo comercial", "relaciones diplomáticas", "cumbre presidencial",
+    "tratado bilateral", "inversión extranjera", "cooperación internacional",
+  ],
+  "Seguridad": [
+    "narcotráfico", "crimen organizado", "ciberdelito", "terrorismo",
+    "trata de personas", "femicidio", "violencia de género",
+    "seguridad fronteriza", "fuerzas federales", "policía provincial",
+    "gendarmería", "prefectura naval", "cárceles federales",
+    "desarticulación de bandas", "protocolos de seguridad", "prevención del delito",
+  ],
+  "Energía": [
+    "Vaca Muerta", "tarifas eléctricas", "tarifas de gas", "subsidios energéticos",
+    "energías renovables", "energía eólica", "energía solar",
+    "litio", "YPF", "hidrocarburos", "gasoducto", "refinerías",
+    "matriz energética", "transición energética", "eficiencia energética",
+  ],
+  "Educación": [
+    "universidades nacionales", "presupuesto educativo", "paritarias docentes",
+    "evaluación Aprender", "secundario obligatorio", "educación técnica",
+    "CONICET", "becas Progresar", "infraestructura escolar",
+    "conectividad educativa", "alfabetización digital", "educación sexual integral",
   ],
   "Opinión": [
     "la crisis política", "el futuro económico", "la justicia social",
-    "la democracia argentina", "el modelo de país",
+    "la democracia argentina", "el modelo de país", "la grieta política",
+    "el rol del Estado", "la integración regional", "las próximas elecciones",
+    "la deuda externa", "el cambio climático", "los derechos humanos",
+  ],
+  "Datos y Visualizaciones": [
+    "la pobreza", "el desempleo", "la inflación", "el PBI",
+    "las exportaciones", "la inversión", "el déficit fiscal",
+    "la distribución del ingreso", "el acceso a servicios", "la violencia",
+    "el presupuesto público", "la deuda pública", "las reservas",
   ],
 };
 
@@ -146,82 +361,47 @@ async function generateSingleArticle(
   sourceId: string,
   categoryName: string
 ): Promise<InsertArticle> {
-  const prompt = `Eres un periodista profesional argentino especializado en ${categoryName}.
-
-Genera un artículo periodístico COMPLETO Y EXTENSO basado en esta idea:
-"${idea}"
-
-REQUISITOS OBLIGATORIOS:
-- Escribe en español argentino profesional
-- Tono editorial serio, objetivo y balanceado
-- MÍNIMO 1200 palabras (muy importante)
-- Incluye: introducción, desarrollo con 4-6 subtemas, conclusión
-- Usa subtítulos <h2> y <h3> para organizar
-- Cita fuentes genéricas: "fuentes oficiales", "según el expediente", "documentos a los que accedió POLÍTICA ARGENTINA"
-- Incluye datos concretos, estadísticas, contexto histórico
-- Analiza consecuencias políticas, económicas y sociales
-- Menciona posiciones de diferentes actores políticos
-- Evita sensacionalismo, mantén rigor periodístico
-
-Responde SOLO con JSON válido:
-{
-  "title": "Título periodístico impactante pero serio (60-90 caracteres)",
-  "summary": "Bajada o copete del artículo (140-180 caracteres)",
-  "content": "Contenido COMPLETO en HTML con <p>, <h2>, <h3>, <strong>, <em>, <blockquote>",
-  "slug": "slug-url-amigable",
-  "author": "Nombre del autor (usa nombres argentinos realistas)"
-}`;
-
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.9, // More creative variety
-      }
-    });
+    // Generate article using LOCAL generator (no API required!)
+    console.log(`📝 Generando artículo local: "${idea}"`);
+    const { content, summary } = generateLocalArticle(idea, categoryName);
 
-    const responseText = response.text || "{}";
-    let jsonText = responseText;
-    
-    // Extract JSON from markdown if needed
-    const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || responseText.match(/```\n([\s\S]*?)\n```/);
-    if (jsonMatch) {
-      jsonText = jsonMatch[1] || responseText;
-    }
-
-    const data = JSON.parse(jsonText.trim());
+    // Generate title and author
+    const title = idea.charAt(0).toUpperCase() + idea.slice(1);
+    const author = generateAuthor();
+    const slug = idea.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
 
     // Search for hyperrealistic contextual image using Pexels
-    console.log(`🔍 Buscando imagen hiperrealista para: "${data.title}"`);
+    console.log(`🔍 Buscando imagen contextual para: "${title}"`);
     const contextualImage = await imageSearchService.searchContextualImage(
-      data.title,
+      title,
       categoryName,
       undefined,
       'landscape'
     );
 
     const imageUrl = contextualImage?.url || imageSearchService.getFallbackImage(categoryName);
-    
+
     if (contextualImage) {
-      console.log(`✅ Imagen contextual encontrada: ${contextualImage.alt}`);
+      console.log(`✅ Imagen contextual encontrada`);
     } else {
       console.log(`⚠️ Usando imagen fallback para categoría: ${categoryName}`);
     }
 
     return {
-      title: data.title,
-      slug: `${data.slug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      summary: data.summary,
-      content: data.content,
-      author: data.author || "Redacción POLÍTICA ARGENTINA",
+      title,
+      slug: `${slug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      summary,
+      content,
+      author,
       categoryId,
       sourceId,
       status: "published",
       publishedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // Random date within last week
-      viewCount: Math.floor(Math.random() * 8000) + 500,
-      credibilityScore: Math.floor(Math.random() * 15) + 85, // 85-100
+      viewCount: generateViewCount(),
+      credibilityScore: calculateCredibilityScore(),
       imageUrl,
       metadata: contextualImage ? {
         photographer: contextualImage.photographer,
