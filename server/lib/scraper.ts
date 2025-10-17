@@ -1,7 +1,4 @@
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-
-puppeteer.use(StealthPlugin());
+import * as cheerio from 'cheerio';
 
 export interface ScrapedArticle {
   title: string;
@@ -12,79 +9,61 @@ export interface ScrapedArticle {
   imageUrl?: string;
 }
 
-const CLARIN_SELECTORS = {
-  articles: 'article.nota, .col-12.col-md-4, a[href*="/politica/"], a[href*="/economia/"]',
-  title: 'h1, .title, h2.mt-3',
-  paragraphs: 'p',
-  image: 'img[src*="cloudfront"], img[data-src], picture img',
-  date: 'time, .fecha, [datetime]',
-};
-
 const POLITICAL_REGEX = /dólar|cep|milei|política|gobierno|elecciones|congreso|senado|diputados/i;
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+async function fetchWithUserAgent(url: string): Promise<string> {
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'es-AR,es;q=0.9',
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return await response.text();
 }
 
 async function scrapeClarinArticles(): Promise<ScrapedArticle[]> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu'
-    ],
-  });
-
   const articles: ScrapedArticle[] = [];
 
   try {
-    const page = await browser.newPage();
+    const html = await fetchWithUserAgent('https://www.clarin.com/politica/');
+    const $ = cheerio.load(html);
     
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
-
-    await page.goto('https://www.clarin.com/politica/', {
-      waitUntil: 'networkidle2',
-      timeout: 30000,
+    const articleLinks: string[] = [];
+    $('a[href*="/politica/"]').each((_, el) => {
+      const href = $(el).attr('href');
+      if (href && !href.includes('#') && !href.includes('videos') && href.startsWith('http')) {
+        articleLinks.push(href);
+      }
     });
 
-    const articleLinks = await page.$$eval('a[href*="/politica/"]', (links) =>
-      links
-        .map((link) => (link as HTMLAnchorElement).href)
-        .filter((href) => href && !href.includes('#') && !href.includes('videos'))
-        .slice(0, 5)
-    );
+    const uniqueLinks = Array.from(new Set(articleLinks)).slice(0, 5);
 
-    for (const url of articleLinks) {
+    for (const url of uniqueLinks) {
       try {
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 20000 });
+        const articleHtml = await fetchWithUserAgent(url);
+        const article$ = cheerio.load(articleHtml);
 
-        const title = await page.$eval(
-          CLARIN_SELECTORS.title,
-          (el) => el.textContent?.trim() || ''
-        ).catch(() => '');
+        const title = article$('h1').first().text().trim() || 
+                     article$('.title').first().text().trim() ||
+                     article$('h2').first().text().trim();
 
         if (!title || !POLITICAL_REGEX.test(title)) {
           continue;
         }
 
-        const paragraphs = await page.$$eval(CLARIN_SELECTORS.paragraphs, (pElements) =>
-          pElements
-            .map((p) => p.textContent?.trim() || '')
-            .filter((text) => text.length > 50)
-            .slice(0, 3)
-        );
+        const paragraphs: string[] = [];
+        article$('p').each((_, p) => {
+          const text = article$(p).text().trim();
+          if (text.length > 50 && paragraphs.length < 3) {
+            paragraphs.push(text);
+          }
+        });
 
         const content = paragraphs.join('\n\n');
 
@@ -92,15 +71,12 @@ async function scrapeClarinArticles(): Promise<ScrapedArticle[]> {
           continue;
         }
 
-        const imageUrl = await page.$eval(
-          CLARIN_SELECTORS.image,
-          (img) => (img as HTMLImageElement).src || (img as HTMLImageElement).dataset.src || ''
-        ).catch(() => '');
+        const imageUrl = article$('article img, .article-image img, picture img').first().attr('src') || 
+                        article$('img[data-src]').first().attr('data-src') ||
+                        article$('meta[property="og:image"]').attr('content');
 
-        const dateStr = await page.$eval(
-          CLARIN_SELECTORS.date,
-          (el) => el.getAttribute('datetime') || el.textContent?.trim() || ''
-        ).catch(() => '');
+        const dateStr = article$('time').attr('datetime') || 
+                       article$('.fecha, .date').first().text().trim();
 
         let publishedAt = new Date();
         if (dateStr) {
@@ -119,6 +95,8 @@ async function scrapeClarinArticles(): Promise<ScrapedArticle[]> {
           imageUrl: imageUrl || undefined,
         });
 
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
       } catch (error) {
         console.error(`Error scraping article ${url}:`, error);
         continue;
@@ -127,8 +105,6 @@ async function scrapeClarinArticles(): Promise<ScrapedArticle[]> {
 
   } catch (error) {
     console.error('Error in scrapeClarinArticles:', error);
-  } finally {
-    await browser.close();
   }
 
   return articles;

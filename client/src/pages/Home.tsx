@@ -4,8 +4,16 @@ import LiveMetricsTicker from "@/components/LiveMetricsTicker";
 import CategorySection from "@/components/CategorySection";
 import InsightsPanel from "@/components/InsightsPanel";
 import Footer from "@/components/Footer";
+import { useQuery } from "@tanstack/react-query";
+import type { Article } from "@shared/schema";
+import { format } from "date-fns";
 
 export default function Home() {
+  const { data: articles, isLoading } = useQuery<Article[]>({
+    queryKey: ['/api/articles'],
+    staleTime: 30000,
+  });
+
   // Live metrics for ticker
   const liveMetrics = [
     { label: "Dólar Blue", value: "$1,045", change: "+2.3%" },
@@ -14,71 +22,24 @@ export default function Home() {
     { label: "Riesgo País", value: "2,150", change: "+45" }
   ];
 
-  // Categories with articles
-  const categories = [
+  // Transform API articles to category format
+  const categories = articles && articles.length > 0 ? [
     {
-      name: "Política Nacional",
-      articles: [
-        {
-          title: "Congreso Aprueba Reforma Electoral con Amplio Consenso",
-          category: "Nacional",
-          excerpt: "Tras meses de debate, ambas cámaras aprobaron modificaciones al sistema electoral que regirán las elecciones 2025.",
-          author: "Redacción Política",
-          date: "16 Oct",
-          readTime: "8 min",
-          image: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80"
-        },
-        {
-          title: "Análisis IA: Impacto de Inflación en Intención de Voto",
-          category: "Análisis IA",
-          excerpt: "Modelo predictivo correlaciona datos económicos con tendencias electorales en las últimas cinco décadas.",
-          author: "IA Política",
-          date: "15 Oct",
-          readTime: "6 min",
-          image: "https://images.unsplash.com/photo-1555421689-3f034debb7a6?w=800&q=80"
-        },
-        {
-          title: "Buenos Aires: Mapa Electoral por Municipio",
-          category: "Provincial",
-          excerpt: "Visualización interactiva muestra distribución de fuerzas políticas en la provincia más poblada del país.",
-          author: "Data Team",
-          date: "14 Oct",
-          readTime: "5 min",
-          image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&q=80"
-        }
-      ]
-    },
+      name: "Últimas Noticias",
+      articles: articles.slice(0, 6).map(article => ({
+        title: article.title,
+        category: "Política",
+        excerpt: article.summary || article.content.slice(0, 150) + '...',
+        author: article.author || "Redacción",
+        date: format(new Date(article.publishedAt), "d MMM"),
+        readTime: `${Math.ceil(article.content.length / 1000)} min`,
+        image: article.imageUrl || "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80"
+      }))
+    }
+  ] : [
     {
-      name: "Economía & Mercados",
-      articles: [
-        {
-          title: "Dólar: Proyección IA para los Próximos 30 Días",
-          category: "Economía",
-          excerpt: "Sistema de machine learning analiza variables macroeconómicas para proyectar comportamiento del tipo de cambio.",
-          author: "Equipo Económico",
-          date: "16 Oct",
-          readTime: "5 min",
-          image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80"
-        },
-        {
-          title: "Bonos Argentinos: Análisis de Riesgo País",
-          category: "Mercados",
-          excerpt: "Dashboard muestra evolución del riesgo país y correlación con eventos políticos clave.",
-          author: "Analistas Financieros",
-          date: "15 Oct",
-          readTime: "7 min",
-          image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80"
-        },
-        {
-          title: "Impacto Electoral de Indicadores Económicos",
-          category: "Análisis",
-          excerpt: "Cómo las variables macroeconómicas influyen en la intención de voto según modelos predictivos.",
-          author: "Data Política",
-          date: "14 Oct",
-          readTime: "6 min",
-          image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&q=80"
-        }
-      ]
+      name: "Cargando Noticias",
+      articles: []
     }
   ];
 
