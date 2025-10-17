@@ -9,7 +9,7 @@ import TarjetaNoticiaHumana from "@/components/TarjetaNoticiaHumana";
 import DolarHistoryChart from "@/components/DolarHistoryChart";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import type { Article } from "@shared/schema";
+import type { Article, Category } from "@shared/schema";
 import { format } from "date-fns";
 
 interface DolarData {
@@ -30,6 +30,11 @@ export default function Home() {
     refetchInterval: 30000,
   });
 
+  const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ['/api/categories'],
+    staleTime: 60000,
+  });
+
   const { data: dolarData } = useQuery<DolarData>({
     queryKey: ['/api/dolar'],
     staleTime: 30000,
@@ -48,26 +53,16 @@ export default function Home() {
     { label: "Riesgo País", value: "---", change: "" }
   ];
 
-  // Transform API articles to category format
-  const categories = articles && articles.length > 0 ? [
-    {
-      name: "Últimas Noticias",
-      articles: articles.slice(0, 6).map(article => ({
-        title: article.title,
-        category: "Política",
-        excerpt: article.summary || article.content.slice(0, 150) + '...',
-        author: article.author || "Redacción",
-        date: format(new Date(article.publishedAt), "d MMM"),
-        readTime: `${Math.ceil(article.content.length / 1000)} min`,
-        image: article.imageUrl || "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80"
-      }))
-    }
-  ] : [
-    {
-      name: "Cargando Noticias",
-      articles: []
-    }
-  ];
+  // Get featured categories sorted by priority
+  const featuredCategories = categories
+    ?.filter(cat => cat.isFeatured)
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+    .slice(0, 4) || [];
+
+  // Function to get articles by category
+  const getArticlesByCategory = (categoryId: string) => {
+    return articles?.filter(article => article.categoryId === categoryId).slice(0, 3) || [];
+  };
 
   // Editorial Insights
   const electoralInsights = [
@@ -120,47 +115,68 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Noticias con Perspectiva Humana */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 pb-4 border-b-2 border-accent">
-              <h2 className="text-3xl font-serif font-bold">Últimas Noticias</h2>
-              <p className="text-muted-foreground mt-2">
-                Noticias verificadas con contexto humano
-              </p>
-            </div>
+        {/* Secciones por Categoría Editorial */}
+        {featuredCategories.length > 0 && featuredCategories.map((category) => {
+          const categoryArticles = getArticlesByCategory(category.id);
+          
+          if (categoryArticles.length === 0) return null;
+          
+          return (
+            <section key={category.id} className="py-16 border-t border-border">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-8 pb-4 flex items-center justify-between border-b-2" style={{ borderColor: category.color || '#6CACE4' }}>
+                  <div>
+                    <h2 className="text-3xl font-serif font-bold" style={{ color: category.color || '#6CACE4' }}>
+                      {category.name}
+                    </h2>
+                    <p className="text-muted-foreground mt-2">{category.description}</p>
+                  </div>
+                  <button 
+                    onClick={() => navigate(`/categoria/${category.slug}`)}
+                    className="text-sm font-medium hover:underline"
+                    style={{ color: category.color || '#6CACE4' }}
+                    data-testid={`link-ver-mas-${category.slug}`}
+                  >
+                    Ver más →
+                  </button>
+                </div>
 
-            {articlesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-96 bg-muted animate-pulse rounded-lg"></div>
-                ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {categoryArticles.map((article) => (
+                    <TarjetaNoticiaHumana
+                      key={article.id}
+                      title={article.title}
+                      summary={article.summary || article.content.slice(0, 150) + '...'}
+                      imageUrl={article.imageUrl || undefined}
+                      publishedAt={article.publishedAt || new Date().toISOString()}
+                      author={article.author || undefined}
+                      source={article.sourceId || "Redacción"}
+                      credibilityScore={article.credibilityScore || 70}
+                      category={category.name}
+                      impactoHumano="Esta noticia afecta a millones de argentinos"
+                      onClick={() => navigate(`/articulo/${article.slug}`)}
+                    />
+                  ))}
+                </div>
               </div>
-            ) : articles && articles.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {articles.slice(0, 6).map((article) => (
-                  <TarjetaNoticiaHumana
-                    key={article.id}
-                    title={article.title}
-                    summary={article.summary || article.content.slice(0, 150) + '...'}
-                    imageUrl={article.imageUrl || undefined}
-                    publishedAt={article.publishedAt}
-                    author={article.author || undefined}
-                    source="Clarín"
-                    credibilityScore={article.credibilityScore || 70}
-                    category="Política"
-                    impactoHumano="Esta noticia afecta a millones de argentinos que dependen de la estabilidad económica"
-                    onClick={() => navigate(`/articulo/${article.slug}`)}
-                  />
-                ))}
-              </div>
-            ) : (
+            </section>
+          );
+        })}
+
+        {/* Fallback si no hay categorías o artículos */}
+        {(!featuredCategories.length || !articles?.length) && (
+          <section className="py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No hay noticias disponibles. Ejecuta el scraping para obtener noticias.</p>
+                <p className="text-muted-foreground">
+                  {categoriesLoading || articlesLoading 
+                    ? "Cargando contenido..." 
+                    : "No hay noticias disponibles. Ejecuta el generador de artículos en el panel de administración."}
+                </p>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         {/* Editorial Insights Section - Bloomberg Style */}
         <section className="py-16 bg-muted/30">
