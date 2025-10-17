@@ -14,6 +14,66 @@ interface GeneratedArticle {
   author: string;
 }
 
+export async function generateArticleIdeas(categoryName?: string): Promise<string[]> {
+  const categoryContext = categoryName ? ` relacionados con ${categoryName}` : "";
+  
+  const systemPrompt = `Eres un experto en periodismo político argentino y SEO para medios digitales. 
+Generas ideas de artículos que maximizan el engagement, tráfico orgánico y relevancia editorial.`;
+
+  const userPrompt = `Genera 6 ideas de temas para artículos periodísticos de alto impacto sobre política argentina${categoryContext}.
+
+Cada tema debe ser:
+- Trending y de máxima relevancia actual
+- Optimizado para SEO (palabras clave estratégicas)
+- Específico y accionable para un artículo de análisis
+- Enfocado en Argentina (política, economía, justicia, sociedad)
+- Atractivo para audiencia premium interesada en política
+
+Responde SOLO con JSON en este formato:
+{
+  "ideas": [
+    "tema 1",
+    "tema 2",
+    "tema 3",
+    "tema 4",
+    "tema 5",
+    "tema 6"
+  ]
+}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            ideas: { 
+              type: "array",
+              items: { type: "string" }
+            },
+          },
+          required: ["ideas"],
+        },
+      },
+      contents: userPrompt,
+    });
+
+    const rawJson = response.text;
+    if (!rawJson) {
+      throw new Error("Respuesta vacía del modelo");
+    }
+
+    const data = JSON.parse(rawJson);
+    return data.ideas || [];
+  } catch (error) {
+    console.error("Error generando ideas:", error);
+    throw new Error(`Error al generar ideas: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+  }
+}
+
 export async function generateWorldClassArticle(
   topic?: string,
   categoryName?: string

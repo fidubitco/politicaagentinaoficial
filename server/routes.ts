@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { scrapeAllSources } from "./lib/scraper";
 import { generateArticles } from "./lib/article-generator";
 import { defaultCategories } from "./lib/category-seed";
-import { generateWorldClassArticle } from "./lib/article-auto-generator";
+import { generateWorldClassArticle, generateArticleIdeas } from "./lib/article-auto-generator";
 import { insertArticleSchema, insertSourceSchema, insertCategorySchema } from "@shared/schema";
 
 function generateSlug(title: string): string {
@@ -386,6 +386,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error auto-generating article:", error);
       res.status(500).json({ 
         error: error instanceof Error ? error.message : "Error al generar el artículo" 
+      });
+    }
+  });
+
+  // Generate article topic ideas with SEO optimization
+  app.post("/api/admin/generate-article-ideas", async (req, res) => {
+    try {
+      const { categoryId } = req.body;
+
+      // Get category info if provided
+      let categoryName: string | undefined;
+      if (categoryId) {
+        const category = await storage.getCategoryById(categoryId);
+        categoryName = category?.name;
+      }
+
+      // Generate ideas with Gemini
+      const ideas = await generateArticleIdeas(categoryName);
+
+      res.json({
+        success: true,
+        ideas,
+      });
+    } catch (error) {
+      console.error("Error generating ideas:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Error al generar ideas" 
       });
     }
   });

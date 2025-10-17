@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Lightbulb } from "lucide-react";
 
 const articleFormSchema = z.object({
   title: z.string().min(10, "El título debe tener al menos 10 caracteres"),
@@ -40,6 +40,7 @@ export default function AdminArticleForm() {
   const { toast } = useToast();
   const [isAutoGenDialogOpen, setIsAutoGenDialogOpen] = useState(false);
   const [autoGenTopic, setAutoGenTopic] = useState("");
+  const [topicIdeas, setTopicIdeas] = useState<string[]>([]);
 
   const { data: article } = useQuery<Article>({
     queryKey: ['/api/admin/articles', articleId],
@@ -164,6 +165,34 @@ export default function AdminArticleForm() {
     });
   };
 
+  const generateIdeasMutation = useMutation({
+    mutationFn: async (data: { categoryId?: string }) => {
+      return await apiRequest('POST', '/api/admin/generate-article-ideas', data);
+    },
+    onSuccess: (data: any) => {
+      setTopicIdeas(data.ideas || []);
+      toast({
+        title: "Ideas generadas",
+        description: "Selecciona una idea o escribe tu propio tema",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al generar ideas",
+        description: error.message || "No se pudieron generar ideas de temas",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleGenerateIdeas = () => {
+    const categoryId = form.getValues('categoryId');
+    setTopicIdeas([]);
+    generateIdeasMutation.mutate({
+      categoryId: categoryId || undefined,
+    });
+  };
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -204,7 +233,21 @@ export default function AdminArticleForm() {
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label>Tema del artículo (opcional)</Label>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label>Tema del artículo (opcional)</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleGenerateIdeas}
+                        disabled={generateIdeasMutation.isPending || autoGenerateMutation.isPending}
+                        className="gap-1.5"
+                        data-testid="button-generate-ideas"
+                      >
+                        <Lightbulb className="h-3.5 w-3.5" />
+                        {generateIdeasMutation.isPending ? 'Generando...' : 'Generar Ideas SEO'}
+                      </Button>
+                    </div>
                     <Input
                       value={autoGenTopic}
                       onChange={(e) => setAutoGenTopic(e.target.value)}
@@ -212,6 +255,28 @@ export default function AdminArticleForm() {
                       className="mt-2"
                       data-testid="input-auto-gen-topic"
                     />
+                    
+                    {topicIdeas.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Ideas trending optimizadas para SEO:
+                        </p>
+                        <div className="grid gap-1.5">
+                          {topicIdeas.map((idea, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => setAutoGenTopic(idea)}
+                              className="text-left text-sm p-2 rounded-md hover-elevate active-elevate-2 bg-muted/50 transition-colors"
+                              data-testid={`button-idea-${index}`}
+                            >
+                              {idea}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     <p className="text-xs text-muted-foreground mt-2">
                       Si no especificas un tema, se generará un artículo sobre política argentina actual
                     </p>
