@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Radio, FolderTree, Calendar, Settings, Sparkles } from "lucide-react";
+import { LayoutDashboard, FileText, Radio, FolderTree, Calendar, Settings, Sparkles, Zap } from "lucide-react";
 import { Link } from "wouter";
 import {
   Sidebar,
@@ -28,6 +28,11 @@ const menuItems = [
     title: "Generador",
     url: "/admin/generator",
     icon: Sparkles,
+  },
+  {
+    title: "Generador Masivo",
+    url: "/admin/bulk-generator",
+    icon: Zap,
   },
   {
     title: "Fuentes",

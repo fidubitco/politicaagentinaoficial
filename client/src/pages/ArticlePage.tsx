@@ -65,8 +65,8 @@ export default function ArticlePage() {
         description={article.summary || article.title}
         image={article.imageUrl || undefined}
         article={{
-          publishedTime: article.publishedAt?.toISOString(),
-          modifiedTime: article.updatedAt?.toISOString(),
+          publishedTime: article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined,
+          modifiedTime: article.updatedAt ? new Date(article.updatedAt).toISOString() : undefined,
           author: article.author || undefined,
           section: article.categoryName || undefined,
           tags: article.categoryName ? [article.categoryName] : undefined,

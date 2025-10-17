@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, TrendingUp, Clock } from "lucide-react";
+import { useGSAPAnimations } from "@/hooks/useGSAPAnimations";
 
 interface DolarData {
   oficial: any;
@@ -19,6 +20,8 @@ interface DolarData {
 }
 
 export default function Home() {
+  useGSAPAnimations();
+
   const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ['/api/articles'],
     staleTime: 30000,
@@ -83,7 +86,7 @@ export default function Home() {
       
       {/* Live Breaking News Ticker */}
       {dolarData && (
-        <div className="bg-[hsl(355,70%,48%)] text-white py-2 px-4">
+        <div className="ticker-container bg-[hsl(355,70%,48%)] text-white py-2 px-4">
           <div className="max-w-[1440px] mx-auto flex items-center gap-8 text-sm overflow-hidden">
             <div className="flex items-center gap-2 font-semibold shrink-0">
               <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
@@ -102,7 +105,7 @@ export default function Home() {
       <main className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16">
         {/* Hero Section - Immersive Lead Story */}
         {featuredArticle && (
-          <section className="py-8">
+          <section className="hero-section py-8">
             <Link href={`/articulo/${featuredArticle.slug}`}>
               <div className="relative aspect-[16/9] lg:aspect-[21/9] rounded-lg overflow-hidden group cursor-pointer">
                 {featuredArticle.imageUrl ? (
@@ -123,21 +126,21 @@ export default function Home() {
                   <div className="max-w-4xl">
                     {featuredArticle.categoryId && categories && (
                       <Badge 
-                        className="mb-4 bg-[hsl(355,70%,48%)] text-white hover:bg-[hsl(355,70%,45%)]"
+                        className="hero-badge mb-4 bg-[hsl(355,70%,48%)] text-white hover:bg-[hsl(355,70%,45%)]"
                         data-testid="badge-hero-category"
                       >
                         {categories.find(c => c.id === featuredArticle.categoryId)?.name || 'Noticias'}
                       </Badge>
                     )}
-                    <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight" data-testid="text-hero-title">
+                    <h1 className="hero-title font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight" data-testid="text-hero-title">
                       {featuredArticle.title}
                     </h1>
                     {featuredArticle.summary && (
-                      <p className="text-lg lg:text-xl opacity-90 mb-4 line-clamp-2" data-testid="text-hero-summary">
+                      <p className="hero-summary text-lg lg:text-xl opacity-90 mb-4 line-clamp-2" data-testid="text-hero-summary">
                         {featuredArticle.summary}
                       </p>
                     )}
-                    <div className="flex items-center gap-4 text-sm opacity-80">
+                    <div className="hero-meta flex items-center gap-4 text-sm opacity-80">
                       {featuredArticle.publishedAt && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
@@ -162,11 +165,11 @@ export default function Home() {
           <div className="lg:col-span-8">
             {/* Top Stories Grid */}
             <div className="mb-12">
-              <h2 className="font-serif text-3xl font-bold mb-6">Principales Noticias</h2>
+              <h2 className="section-header font-serif text-3xl font-bold mb-6">Principales Noticias</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {mainArticles.map((article) => (
                   <Link key={article.id} href={`/articulo/${article.slug}`}>
-                    <Card className="h-full hover-elevate active-elevate-2 transition-all duration-300" data-testid={`card-main-article-${article.slug}`}>
+                    <Card className="article-card h-full hover-elevate active-elevate-2 transition-all duration-300" data-testid={`card-main-article-${article.slug}`}>
                       {article.imageUrl && (
                         <div className="aspect-video overflow-hidden">
                           <img 
@@ -209,11 +212,11 @@ export default function Home() {
 
             {/* Latest Articles List */}
             <div>
-              <h2 className="font-serif text-3xl font-bold mb-6">Últimas Noticias</h2>
+              <h2 className="section-header font-serif text-3xl font-bold mb-6">Últimas Noticias</h2>
               <div className="space-y-6">
                 {latestArticles.map((article) => (
                   <Link key={article.id} href={`/articulo/${article.slug}`}>
-                    <Card className="hover-elevate active-elevate-2 transition-all duration-300" data-testid={`card-latest-${article.slug}`}>
+                    <Card className="latest-article-card hover-elevate active-elevate-2 transition-all duration-300" data-testid={`card-latest-${article.slug}`}>
                       <CardContent className="p-6">
                         <div className="flex gap-6">
                           {article.imageUrl && (
@@ -263,7 +266,7 @@ export default function Home() {
           <div className="lg:col-span-4">
             {/* Trending Topics */}
             <div className="sticky top-24">
-              <Card className="mb-6">
+              <Card className="sidebar-widget trending-section mb-6">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-6">
                     <TrendingUp className="h-5 w-5 text-[hsl(355,70%,48%)]" />
@@ -293,7 +296,7 @@ export default function Home() {
               </Card>
 
               {/* Live Updates */}
-              <Card>
+              <Card className="sidebar-widget insights-panel">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-6">
                     <div className="w-2 h-2 rounded-full bg-[hsl(355,70%,48%)] animate-pulse"></div>
