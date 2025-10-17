@@ -8,6 +8,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { HelmetProvider } from "react-helmet-async";
 import Home from "@/pages/Home";
 import CategoryPage from "@/pages/CategoryPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -123,12 +124,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 
