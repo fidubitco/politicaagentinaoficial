@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Sparkles, Lightbulb } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Lightbulb, Volume2, Loader2 } from "lucide-react";
 
 const articleFormSchema = z.object({
   title: z.string().min(10, "El título debe tener al menos 10 caracteres"),
@@ -41,6 +41,8 @@ export default function AdminArticleForm() {
   const [isAutoGenDialogOpen, setIsAutoGenDialogOpen] = useState(false);
   const [autoGenTopic, setAutoGenTopic] = useState("");
   const [topicIdeas, setTopicIdeas] = useState<string[]>([]);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string>("");
 
   const { data: article } = useQuery<Article>({
     queryKey: ['/api/admin/articles', articleId],
@@ -82,6 +84,7 @@ export default function AdminArticleForm() {
         status: (article.status as any) || "published",
         credibilityScore: article.credibilityScore || 70,
       });
+      setAudioUrl(article.audioUrl || "");
     }
   }, [article, isEdit, form]);
 
@@ -191,6 +194,35 @@ export default function AdminArticleForm() {
     generateIdeasMutation.mutate({
       categoryId: categoryId || undefined,
     });
+  };
+
+  const handleGenerateAudio = async () => {
+    if (!articleId || !isEdit) {
+      toast({
+        title: "Error",
+        description: "Guarda el artículo primero antes de generar audio",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingAudio(true);
+    try {
+      const response = await apiRequest('POST', `/api/articles/${articleId}/generate-audio`, {});
+      setAudioUrl(response.audioUrl);
+      toast({
+        title: "Audio generado",
+        description: "El audio estilo podcast ha sido generado exitosamente",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error al generar audio",
+        description: error.message || "No se pudo generar el audio",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingAudio(false);
+    }
   };
 
   return (
@@ -525,6 +557,53 @@ export default function AdminArticleForm() {
               </div>
             </CardContent>
           </Card>
+
+          {isEdit && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Volume2 className="h-5 w-5" />
+                  Audio Podcast Profesional
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Genera una narración profesional estilo podcast de este artículo usando inteligencia artificial de ElevenLabs.
+                </p>
+                
+                {audioUrl && (
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm font-medium mb-2">Audio generado:</p>
+                    <audio controls className="w-full" data-testid="audio-player">
+                      <source src={audioUrl} type="audio/mpeg" />
+                      Tu navegador no soporta el elemento de audio.
+                    </audio>
+                  </div>
+                )}
+
+                <Button
+                  type="button"
+                  onClick={handleGenerateAudio}
+                  disabled={isGeneratingAudio}
+                  variant="outline"
+                  className="w-full gap-2"
+                  data-testid="button-generate-audio"
+                >
+                  {isGeneratingAudio ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generando audio profesional...
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="h-4 w-4" />
+                      {audioUrl ? 'Regenerar Audio' : 'Generar Audio Podcast'}
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex justify-end gap-4">
             <Button

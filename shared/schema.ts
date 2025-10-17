@@ -62,6 +62,7 @@ export const articles = pgTable("articles", {
   summary: text("summary"),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
+  audioUrl: text("audio_url"),
   sourceId: varchar("source_id").references(() => sources.id),
   categoryId: varchar("category_id").references(() => categories.id),
   author: text("author"),

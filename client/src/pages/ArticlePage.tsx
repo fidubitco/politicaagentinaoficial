@@ -4,10 +4,11 @@ import { Article } from "@shared/schema";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Eye, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, Eye, Share2, Volume2 } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function ArticlePage() {
   const [, params] = useRoute("/articulo/:slug");
@@ -58,18 +59,34 @@ export default function ArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header Navigation */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
-            </Button>
-          </Link>
+    <>
+      <SEOHead
+        title={article.title}
+        description={article.summary || article.title}
+        image={article.imageUrl || undefined}
+        article={{
+          publishedTime: article.publishedAt?.toISOString(),
+          modifiedTime: article.updatedAt?.toISOString(),
+          author: article.author || undefined,
+          section: article.categoryName || undefined,
+          tags: article.categoryName ? [article.categoryName] : undefined,
+        }}
+        keywords={article.categoryName ? [article.categoryName, 'política argentina', 'noticias'] : undefined}
+        canonical={`https://politica-argentina.replit.app/articulo/${article.slug}`}
+      />
+      
+      <div className="min-h-screen bg-background">
+        {/* Header Navigation */}
+        <div className="border-b bg-card">
+          <div className="container mx-auto px-4 py-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm" data-testid="button-back">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
 
       {/* Article Content */}
       <article className="container mx-auto px-4 py-8">
@@ -110,11 +127,39 @@ export default function ArticlePage() {
               <Eye className="h-4 w-4" />
               <span>{article.viewCount.toLocaleString('es-AR')} vistas</span>
             </div>
-            <Button variant="outline" size="sm" className="ml-auto">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-auto"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: article.title,
+                    text: article.summary || article.title,
+                    url: window.location.href,
+                  });
+                }
+              }}
+              data-testid="button-share"
+            >
               <Share2 className="h-4 w-4 mr-2" />
               Compartir
             </Button>
           </div>
+
+          {/* Audio Player */}
+          {article.audioUrl && (
+            <Card className="p-6 mb-8 bg-muted/30">
+              <div className="flex items-center gap-3 mb-3">
+                <Volume2 className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Escucha el artículo estilo podcast</h3>
+              </div>
+              <audio controls className="w-full" data-testid="article-audio-player">
+                <source src={article.audioUrl} type="audio/mpeg" />
+                Tu navegador no soporta la reproducción de audio.
+              </audio>
+            </Card>
+          )}
 
           {/* Featured Image */}
           {article.imageUrl && (
@@ -123,6 +168,7 @@ export default function ArticlePage() {
                 src={article.imageUrl}
                 alt={article.title}
                 className="w-full h-auto object-cover"
+                data-testid="article-image"
               />
             </div>
           )}
@@ -165,5 +211,6 @@ export default function ArticlePage() {
         </div>
       </article>
     </div>
+    </>
   );
 }
