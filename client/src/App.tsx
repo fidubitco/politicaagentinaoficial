@@ -15,6 +15,7 @@ import CategoryPage from "@/pages/CategoryPage";
 import ArticlePage from "@/pages/ArticlePage";
 import AboutPage from "@/pages/AboutPage";
 import ContactPage from "@/pages/ContactPage";
+import OfflinePage from "@/pages/OfflinePage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminArticles from "@/pages/admin/AdminArticles";
 import AdminArticleForm from "@/pages/admin/AdminArticleForm";
@@ -77,7 +78,10 @@ function Router() {
       <Route path="/:locale/articulo/:slug" component={ArticlePage} />
       <Route path="/:locale/nosotros" component={AboutPage} />
       <Route path="/:locale/contacto" component={ContactPage} />
-      
+
+      {/* Offline page */}
+      <Route path="/offline" component={OfflinePage} />
+
       {/* Admin Routes (no localization) */}
       <Route path="/admin">
         <AdminLayout>

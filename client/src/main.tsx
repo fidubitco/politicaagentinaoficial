@@ -5,14 +5,27 @@ import "./styles/tokens.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingFallback } from "./components/LoadingFallback";
 import { Suspense } from "react";
+import { registerServiceWorker, setupNetworkDetection, setupInstallPrompt } from "./utils/pwa";
+import { initWebVitals } from "./utils/webVitals";
+import { initGA, analytics } from "./utils/analytics";
 
 // Add global error handler
 window.addEventListener('error', (event) => {
   console.error('Global error:', event.error);
+
+  // Track errors in analytics
+  if (typeof analytics !== 'undefined' && import.meta.env.PROD) {
+    analytics.trackError('JavaScript Error', event.error?.message || 'Unknown error', true);
+  }
 });
 
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
+
+  // Track promise rejections in analytics
+  if (typeof analytics !== 'undefined' && import.meta.env.PROD) {
+    analytics.trackError('Unhandled Rejection', event.reason?.message || 'Unknown rejection', false);
+  }
 });
 
 try {
@@ -33,6 +46,29 @@ try {
   );
 
   console.log('React app initialized successfully');
+
+  // Initialize Web Vitals monitoring
+  initWebVitals();
+
+  // Initialize Analytics
+  if (import.meta.env.PROD) {
+    initGA();
+  }
+
+  // Register PWA service worker
+  if (import.meta.env.PROD) {
+    registerServiceWorker().then(() => {
+      console.log('PWA: Service worker registered');
+    });
+
+    // Setup network detection
+    setupNetworkDetection();
+
+    // Setup install prompt
+    setupInstallPrompt((event) => {
+      console.log('PWA: Install prompt available', event);
+    });
+  }
 } catch (error) {
   console.error('Failed to initialize app:', error);
 

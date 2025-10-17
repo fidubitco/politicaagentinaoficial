@@ -387,6 +387,15 @@
   }
 }
 
+@keyframes wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
@@ -437,6 +446,10 @@ img {
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite linear;
+}
+
+.animate-wave {
+  animation: wave 3s infinite ease-in-out;
 }
 
 /* Button press feedback */
