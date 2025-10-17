@@ -9,6 +9,8 @@ import Home from "@/pages/Home";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminArticles from "@/pages/admin/AdminArticles";
 import AdminArticleForm from "@/pages/admin/AdminArticleForm";
+import AdminSources from "@/pages/admin/AdminSources";
+import AdminCategories from "@/pages/admin/AdminCategories";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -61,6 +63,18 @@ function Router() {
       <Route path="/admin/articles/:id/edit">
         <AdminLayout>
           <AdminArticleForm />
+        </AdminLayout>
+      </Route>
+      
+      <Route path="/admin/sources">
+        <AdminLayout>
+          <AdminSources />
+        </AdminLayout>
+      </Route>
+      
+      <Route path="/admin/categories">
+        <AdminLayout>
+          <AdminCategories />
         </AdminLayout>
       </Route>
       
