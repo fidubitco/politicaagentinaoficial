@@ -33,11 +33,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!article) {
         return res.status(404).json({ error: "Article not found" });
       }
-      // Increment view count asynchronously
-      storage.incrementArticleViews(article.id).catch(err => 
-        console.error("Error incrementing views:", err)
-      );
-      res.json(article);
+      // Increment view count and get updated article
+      await storage.incrementArticleViews(article.id);
+      const updatedArticle = await storage.getArticleById(article.id);
+      res.json(updatedArticle || article);
     } catch (error) {
       console.error("Error fetching article:", error);
       res.status(500).json({ error: "Failed to fetch article" });
