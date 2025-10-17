@@ -4,22 +4,44 @@ import LiveMetricsTicker from "@/components/LiveMetricsTicker";
 import CategorySection from "@/components/CategorySection";
 import InsightsPanel from "@/components/InsightsPanel";
 import Footer from "@/components/Footer";
+import MetricaHumana from "@/components/MetricaHumana";
+import TarjetaNoticiaHumana from "@/components/TarjetaNoticiaHumana";
 import { useQuery } from "@tanstack/react-query";
 import type { Article } from "@shared/schema";
 import { format } from "date-fns";
 
+interface DolarData {
+  oficial: any;
+  blue: any;
+  mep: any;
+  ccl: any;
+  tarjeta: any;
+  timestamp: string;
+}
+
 export default function Home() {
-  const { data: articles, isLoading } = useQuery<Article[]>({
+  const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ['/api/articles'],
     staleTime: 30000,
+    refetchInterval: 30000,
   });
 
-  // Live metrics for ticker
-  const liveMetrics = [
-    { label: "Dólar Blue", value: "$1,045", change: "+2.3%" },
-    { label: "Inflación", value: "8.3%", change: "-0.5%" },
-    { label: "Aprobación", value: "42%", change: "+1.2%" },
-    { label: "Riesgo País", value: "2,150", change: "+45" }
+  const { data: dolarData } = useQuery<DolarData>({
+    queryKey: ['/api/dolar'],
+    staleTime: 30000,
+    refetchInterval: 30000,
+  });
+
+  const liveMetrics = dolarData ? [
+    { label: "Dólar Blue", value: `$${dolarData.blue?.venta?.toLocaleString('es-AR') || '---'}`, change: "+2.3%" },
+    { label: "Dólar Oficial", value: `$${dolarData.oficial?.venta?.toLocaleString('es-AR') || '---'}`, change: "-0.5%" },
+    { label: "MEP", value: `$${dolarData.mep?.venta?.toLocaleString('es-AR') || '---'}`, change: "+1.2%" },
+    { label: "Tarjeta", value: `$${dolarData.tarjeta?.venta?.toLocaleString('es-AR') || '---'}`, change: "+45" }
+  ] : [
+    { label: "Dólar Blue", value: "Cargando...", change: "" },
+    { label: "Inflación", value: "---", change: "" },
+    { label: "Aprobación", value: "---", change: "" },
+    { label: "Riesgo País", value: "---", change: "" }
   ];
 
   // Transform API articles to category format
@@ -64,10 +86,74 @@ export default function Home() {
       
       {/* Main Content */}
       <main>
-        {/* Editorial Sections */}
-        {categories.map((category, idx) => (
-          <CategorySection key={idx} category={category} />
-        ))}
+        {/* Métricas Humanizadas del Dólar */}
+        <section className="py-12 bg-gradient-to-br from-[#6CACE4]/5 via-background to-[#F6B40E]/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-8">
+              <h2 className="text-3xl font-serif font-bold mb-2">Economía Real</h2>
+              <p className="text-muted-foreground">Cómo te afecta el dólar en tu vida diaria</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <MetricaHumana 
+                tipo="blue" 
+                dolarData={dolarData?.blue}
+                variacionDiaria={2.3}
+              />
+              <MetricaHumana 
+                tipo="oficial" 
+                dolarData={dolarData?.oficial}
+                variacionDiaria={-0.5}
+              />
+              <MetricaHumana 
+                tipo="mep" 
+                dolarData={dolarData?.mep}
+                variacionDiaria={1.2}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Noticias con Perspectiva Humana */}
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 pb-4 border-b-2 border-accent">
+              <h2 className="text-3xl font-serif font-bold">Últimas Noticias</h2>
+              <p className="text-muted-foreground mt-2">
+                Noticias verificadas con contexto humano
+              </p>
+            </div>
+
+            {articlesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-96 bg-muted animate-pulse rounded-lg"></div>
+                ))}
+              </div>
+            ) : articles && articles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {articles.slice(0, 6).map((article) => (
+                  <TarjetaNoticiaHumana
+                    key={article.id}
+                    title={article.title}
+                    summary={article.summary || article.content.slice(0, 150) + '...'}
+                    imageUrl={article.imageUrl || undefined}
+                    publishedAt={article.publishedAt}
+                    author={article.author || undefined}
+                    source="Clarín"
+                    credibilityScore={article.credibilityScore || 70}
+                    category="Política"
+                    impactoHumano="Esta noticia afecta a millones de argentinos que dependen de la estabilidad económica"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No hay noticias disponibles. Ejecuta el scraping para obtener noticias.</p>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* AI Insights Section - Bloomberg Style */}
         <section className="py-16 bg-muted/30">

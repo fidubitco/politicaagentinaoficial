@@ -121,6 +121,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  let dolarCache: { data: any; timestamp: number } | null = null;
+  const DOLAR_CACHE_TTL = 30000; // 30 seconds
+
+  app.get("/api/dolar", async (req, res) => {
+    try {
+      const now = Date.now();
+      
+      if (dolarCache && (now - dolarCache.timestamp) < DOLAR_CACHE_TTL) {
+        return res.json(dolarCache.data);
+      }
+
+      const response = await fetch('https://dolarapi.com/v1/dolares');
+      if (!response.ok) {
+        throw new Error(`DolarAPI error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      const formatted = {
+        oficial: data.find((d: any) => d.casa === 'oficial'),
+        blue: data.find((d: any) => d.casa === 'blue'),
+        mep: data.find((d: any) => d.casa === 'bolsa'),
+        ccl: data.find((d: any) => d.casa === 'contadoconliqui'),
+        tarjeta: data.find((d: any) => d.casa === 'tarjeta'),
+        timestamp: new Date().toISOString(),
+      };
+
+      dolarCache = { data: formatted, timestamp: now };
+      
+      res.json(formatted);
+    } catch (error) {
+      console.error("Error fetching dolar:", error);
+      res.status(500).json({ error: "Failed to fetch dolar data" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
