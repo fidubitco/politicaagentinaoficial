@@ -1,0 +1,178 @@
+inpage.js:1 MetaMask encountered an error setting the global Ethereum provider - this is likely due to another Ethereum wallet extension also setting the global Ethereum provider: TypeError: Cannot assign to read only property 'ethereum' of object '#<Window>'
+    at a (inpage.js:1:51283)
+    at r.initializeProvider (inpage.js:1:51054)
+    at Object.<anonymous> (inpage.js:1:2308)
+    at Object.<anonymous> (inpage.js:1:6316)
+    at 2.../../shared/modules/provider-injection (inpage.js:1:6329)
+    at i (inpage.js:1:254)
+    at e (inpage.js:1:412)
+    at inpage.js:1:429
+a	@	inpage.js:1
+76
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+76
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+76
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+/import:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+/import:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+/import:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+inpage.js:154 Uncaught (in promise) TypeError: Cannot set property chainId of [object Object] which has only a getter
+    at inpage.js:154:33861
+    at Array.forEach (<anonymous>)
+    at inpage.js:154:33830
+inpage.js:1 MetaMask encountered an error setting the global Ethereum provider - this is likely due to another Ethereum wallet extension also setting the global Ethereum provider: TypeError: Cannot assign to read only property 'ethereum' of object '#<Window>'
+    at a (inpage.js:1:51283)
+    at r.initializeProvider (inpage.js:1:51054)
+    at Object.<anonymous> (inpage.js:1:2308)
+    at Object.<anonymous> (inpage.js:1:6316)
+    at 2.../../shared/modules/provider-injection (inpage.js:1:6329)
+    at i (inpage.js:1:254)
+    at e (inpage.js:1:412)
+    at inpage.js:1:429
+cdn.segment.com/next…ics.dynamic.js.gz:1 
+ Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+www.googletagmanager…id=AW-11411994397:1 
+ Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+inpage.js:154 Uncaught (in promise) TypeError: Cannot set property chainId of [object Object] which has only a getter
+    at inpage.js:154:33861
+    at Array.forEach (<anonymous>)
+    at inpage.js:154:33830
+chrome-extension://m…neiii/inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://js.stripe.com" from accessing a cross-origin frame.
+    at new p (inpage.js:154:28639)
+    at 19035 (inpage.js:154:33654)
+    at r (inpage.js:169:94598)
+    at inpage.js:169:95290
+    at inpage.js:169:95300
+    at inpage.js:169:95304
+inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://js.stripe.com" from accessing a cross-origin frame.
+    at new p (inpage.js:154:28639)
+    at 19035 (inpage.js:154:33654)
+    at r (inpage.js:169:94598)
+    at inpage.js:169:95290
+    at inpage.js:169:95300
+    at inpage.js:169:95304
+inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://m.stripe.network" from accessing a cross-origin frame.
+    at new p (inpage.js:154:28639)
+    at 19035 (inpage.js:154:33654)
+    at r (inpage.js:169:94598)
+    at inpage.js:169:95290
+    at inpage.js:169:95300
+    at inpage.js:169:95304
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+events.launchdarkly.…65152ab14c5942820:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+events.launchdarkly.…65152ab14c5942820:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+graphql:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+graphql:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+graphql:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+_app-ffe7533ba0247528.js:1 Uncaught (in promise) ApolloError: Failed to fetch
+    at new t (_app-ffe7533ba0247528.js:1:196907)
+    at Object.error (_app-ffe7533ba0247528.js:4:227444)
+    at v (_app-ffe7533ba0247528.js:4:6509)
+    at y (_app-ffe7533ba0247528.js:4:6991)
+    at t.error (_app-ffe7533ba0247528.js:4:7544)
+    at Object.error (_app-ffe7533ba0247528.js:4:211340)
+    at v (_app-ffe7533ba0247528.js:4:6509)
+    at y (_app-ffe7533ba0247528.js:4:6991)
+    at t.error (_app-ffe7533ba0247528.js:4:7544)
+    at _app-ffe7533ba0247528.js:1:411909
+    at Array.forEach (<anonymous>)
+    at n (_app-ffe7533ba0247528.js:1:411878)
+    at Object.error (_app-ffe7533ba0247528.js:4:212490)
+    at v (_app-ffe7533ba0247528.js:4:6509)
+    at y (_app-ffe7533ba0247528.js:4:6991)
+    at t.error (_app-ffe7533ba0247528.js:4:7544)
+    at e.<anonymous> (_app-ffe7533ba0247528.js:4:271296)
+    at Object.next (_app-ffe7533ba0247528.js:1:402585)
+    at a (_app-ffe7533ba0247528.js:1:401423)
+events.launchdarkly.…65152ab14c5942820:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+events.launchdarkly.…65152ab14c5942820:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+m.stripe.com/6:1 
+ Failed to load resource: net::ERR_INTERNET_DISCONNECTED
+m.stripe.network/inn…_[version]=acacia:1 Uncaught (in promise) undefined
+_app-ffe7533ba0247528.js:4 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+events.launchdarkly.…65152ab14c5942820:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+graphql:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+events.launchdarkly.…65152ab14c5942820:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+/graphql:1 
+ Failed to load resource: net::ERR_HTTP2_PROTOCOL_ERROR
+/graphql:1 
+ Failed to load resource: net::ERR_HTTP2_PROTOCOL_ERROR
+m.stripe.com/6:1 
+ Failed to load resource: net::ERR_CONNECTION_CLOSED
+46
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+cf.js?config=%257B%2…22%253Atrue%257D:10 Uncaught (in promise) Error: Timeout waiting for command after 3600000ms for:
+e=>!("treatmentApplied"!==e.subscribe||!e.callback)
+t1.gstatic.com/favic…hema.org/&size=32:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+_app-ffe7533ba0247528.js:28 [Coframe] Mutation callback infinite loop protection triggered, disconnecting mutation observer 
+Object
+ingest.app.coframe.c…4cddb58cf3a1f93d/:1 
+ Failed to load resource: the server responded with a status of 502 ()
+t1.gstatic.com/favic…hema.org/&size=32:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+t2.gstatic.com/favic…chema.org&size=32:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+t2.gstatic.com/favic…chema.org&size=32:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+t2.gstatic.com/favic…chema.org&size=32:1 
+ Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+chrome-extension://m…neiii/inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://www.google.com" from accessing a cross-origin frame.
+    at new p (inpage.js:154:28639)
+    at 19035 (inpage.js:154:33654)
+    at r (inpage.js:169:94598)
+    at inpage.js:169:95290
+    at inpage.js:169:95300
+    at inpage.js:169:95304
+inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://www.google.com" from accessing a cross-origin frame.
+    at new p (inpage.js:154:28639)
+    at 19035 (inpage.js:154:33654)
+    at r (inpage.js:169:94598)
+    at inpage.js:169:95290
+    at inpage.js:169:95300
+    at inpage.js:169:95304
+chrome-extension://m…neiii/inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://0082c8f7-6424-4513-9c2d-45628f68fe9f-00-38udh8ns2d5az.riker.replit.dev" from accessing a cross-origin frame.
+    at new p (chrome-extension://m…inpage.js:154:28639)
+    at 19035 (chrome-extension://m…inpage.js:154:33654)
+    at r (chrome-extension://m…inpage.js:169:94598)
+    at chrome-extension://m…inpage.js:169:95290
+    at chrome-extension://m…inpage.js:169:95300
+    at chrome-extension://m…inpage.js:169:95304
+chrome-extension://m…neiii/inpage.js:154 Uncaught (in promise) SecurityError: Failed to read a named property 'origin' from 'Location': Blocked a frame with origin "https://0082c8f7-6424-4513-9c2d-45628f68fe9f-00-38udh8ns2d5az.riker.replit.dev" from accessing a cross-origin frame.
+    at new p (chrome-extension://m…inpage.js:154:28639)
+    at 19035 (chrome-extension://m…inpage.js:154:33654)
+    at r (chrome-extension://m…inpage.js:169:94598)
+    at chrome-extension://m…inpage.js:169:95290
+    at chrome-extension://m…inpage.js:169:95300
+    at chrome-extension://m…inpage.js:169:95304
+_app-ffe7533ba0247528.js:28 Failed when connecting: Connection closed (code: 1006)
+0082c8f7-6424-4513-9…ArticlePage.tsx:245 Uncaught (in promise) InvalidStateError: Failed to execute 'share' on 'Navigator': An earlier share has not yet completed.
+    at onClick (0082c8f7-6424-4513-9…iclePage.tsx:245:29)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-RPCDYKBN.js:3736:33)
+    at executeDispatch (chunk-RPCDYKBN.js:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-RPCDYKBN.js:7034:15)
+    at processDispatchQueue (chunk-RPCDYKBN.js:7043:13)
+    at dispatchEventsForPlugins (chunk-RPCDYKBN.js:7051:11)
+    at chunk-RPCDYKBN.js:7174:20
+dossier-secreto-las-…te-de-la-fiscalia:1 Uncaught (in promise) AbortError: Share canceled
+﻿
+

@@ -14,7 +14,33 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### October 2025 - Enhanced Navigation & Dashboard (Latest)
+### October 2025 - Hyperrealistic Contextual Images System (Latest)
+
+**Pexels API Integration for Professional Photography**:
+- Implemented intelligent ImageSearchService analyzing article title + category for precise keyword generation
+- Category-to-keyword mapping covers all production categories (Política Nacional, Economía, Internacional, Justicia, Provincias, Casa Rosada, etc.)
+- Automatic photographer attribution: metadata persisted in article.metadata JSON field ({ photographer, photographerUrl })
+- LazyImage component enhanced with blur-up LQIP placeholders, smooth zoom hover effects, photographer credits overlay
+- Fallback system ensures images always load even when Pexels API fails (category-specific Unsplash fallbacks)
+
+**API & Error Handling**:
+- POST /api/images/search endpoint for on-demand contextual image search with robust error handling
+- Returns structured responses with fallback reasons: 'missing_api_key', 'no_results', 'search_error'
+- Enhanced logging with emoji indicators (⚠️ ℹ️ ❌ 🔄) for better debugging visibility
+
+**Design & Performance Optimizations**:
+- Home page redesign: masonry grid layout, parallax hero with gradient overlays, professional micro-animations
+- ArticlePage optimized with featured images, responsive layouts, photographer attribution on hover
+- CSS animations in index.css provide smooth, subtle interaction feedback
+- WebP/AVIF support with progressive loading for optimal performance
+
+**Important Notes**:
+- Only NEW articles generated after this update include Pexels images with photographer metadata
+- Existing articles with Clarín/scraped images won't show photographer credits (expected behavior)
+- PEXELS_API_KEY required in Replit Secrets for contextual image search
+- Metadata structure: article.metadata = { photographer: "John Doe", photographerUrl: "https://..." }
+
+### October 2025 - Enhanced Navigation & Dashboard
 
 **Navigation System Upgrade**:
 - Implemented bidirectional navigation between admin panel and public website
