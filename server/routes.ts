@@ -32,6 +32,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!article) {
         return res.status(404).json({ error: "Article not found" });
       }
+      // Increment view count asynchronously
+      storage.incrementArticleViews(article.id).catch(err => 
+        console.error("Error incrementing views:", err)
+      );
       res.json(article);
     } catch (error) {
       console.error("Error fetching article:", error);

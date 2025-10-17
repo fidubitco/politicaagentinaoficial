@@ -11,6 +11,7 @@ import AdminArticles from "@/pages/admin/AdminArticles";
 import AdminArticleForm from "@/pages/admin/AdminArticleForm";
 import AdminSources from "@/pages/admin/AdminSources";
 import AdminCategories from "@/pages/admin/AdminCategories";
+import ArticlePage from "@/pages/ArticlePage";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      
+      {/* Article Page */}
+      <Route path="/articulo/:slug" component={ArticlePage} />
       
       {/* Admin Routes */}
       <Route path="/admin">

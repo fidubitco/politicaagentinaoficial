@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
@@ -30,6 +30,7 @@ export interface IStorage {
   createArticle(article: InsertArticle): Promise<Article>;
   updateArticle(id: string, article: Partial<InsertArticle>): Promise<Article>;
   deleteArticle(id: string): Promise<void>;
+  incrementArticleViews(id: string): Promise<void>;
   
   getSources(): Promise<Source[]>;
   getSourceById(id: string): Promise<Source | undefined>;
@@ -134,6 +135,13 @@ export class DatabaseStorage implements IStorage {
 
   async deleteArticle(id: string): Promise<void> {
     await this.db.delete(articles).where(eq(articles.id, id));
+  }
+
+  async incrementArticleViews(id: string): Promise<void> {
+    await this.db
+      .update(articles)
+      .set({ viewCount: sql`${articles.viewCount} + 1` })
+      .where(eq(articles.id, id));
   }
 
   async getSourceById(id: string): Promise<Source | undefined> {
