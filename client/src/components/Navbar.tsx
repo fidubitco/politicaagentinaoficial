@@ -1,16 +1,25 @@
 import { Search, Menu, X, Settings } from "lucide-react";
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
+import type { Category } from "@shared/schema";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [location] = useLocation();
 
-  const categories = [
-    "Nacional", "Provincial", "Economía", "Internacional", 
-    "Análisis", "Dashboard"
-  ];
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['/api/categories'],
+    staleTime: 60000,
+  });
+
+  // Get featured categories for navbar
+  const navCategories = categories
+    ?.filter(cat => cat.isFeatured)
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+    .slice(0, 6) || [];
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b border-border">
@@ -25,14 +34,23 @@ export default function Navbar() {
 
           {/* Desktop Navigation - Clean Editorial */}
           <div className="hidden md:flex items-center gap-1">
-            {categories.map((cat) => (
+            <Button
+              variant="ghost"
+              className="text-sm font-medium hover-elevate"
+              data-testid="nav-home"
+              asChild
+            >
+              <Link href="/">Inicio</Link>
+            </Button>
+            {navCategories.map((cat) => (
               <Button
-                key={cat}
+                key={cat.id}
                 variant="ghost"
                 className="text-sm font-medium hover-elevate"
-                data-testid={`nav-${cat.toLowerCase()}`}
+                data-testid={`nav-${cat.slug}`}
+                asChild
               >
-                {cat}
+                <Link href={`/categoria/${cat.slug}`}>{cat.name}</Link>
               </Button>
             ))}
           </div>
@@ -48,12 +66,12 @@ export default function Navbar() {
                 data-testid="input-search"
               />
             </div>
-            <Link href="/admin">
-              <Button variant="outline" size="sm" className="gap-2" data-testid="button-admin">
+            <Button variant="outline" size="sm" className="gap-2" data-testid="button-admin" asChild>
+              <Link href="/admin">
                 <Settings className="h-4 w-4" />
                 Admin
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -80,14 +98,23 @@ export default function Navbar() {
               className="w-full mb-4"
               data-testid="input-mobile-search"
             />
-            {categories.map((cat) => (
+            <Button
+              variant="ghost"
+              className="w-full justify-start hover-elevate"
+              data-testid="mobile-nav-home"
+              asChild
+            >
+              <Link href="/">Inicio</Link>
+            </Button>
+            {navCategories.map((cat) => (
               <Button
-                key={cat}
+                key={cat.id}
                 variant="ghost"
                 className="w-full justify-start hover-elevate"
-                data-testid={`mobile-nav-${cat.toLowerCase()}`}
+                data-testid={`mobile-nav-${cat.slug}`}
+                asChild
               >
-                {cat}
+                <Link href={`/categoria/${cat.slug}`}>{cat.name}</Link>
               </Button>
             ))}
             <Button

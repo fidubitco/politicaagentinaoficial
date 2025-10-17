@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import Home from "@/pages/Home";
+import CategoryPage from "@/pages/CategoryPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminArticles from "@/pages/admin/AdminArticles";
 import AdminArticleForm from "@/pages/admin/AdminArticleForm";
@@ -58,6 +59,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      
+      {/* Category Page */}
+      <Route path="/categoria/:slug" component={CategoryPage} />
       
       {/* Article Page */}
       <Route path="/articulo/:slug" component={ArticlePage} />
