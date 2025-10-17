@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { scrapeAllSources } from "./lib/scraper";
 import { generateArticles } from "./lib/article-generator";
 import { defaultCategories } from "./lib/category-seed";
+import { generateWorldClassArticle } from "./lib/article-auto-generator";
 import { insertArticleSchema, insertSourceSchema, insertCategorySchema } from "@shared/schema";
 
 function generateSlug(title: string): string {
@@ -351,6 +352,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating articles:", error);
       res.status(500).json({ error: "Failed to generate articles" });
+    }
+  });
+
+  // Auto-generate world-class article with Gemini AI
+  app.post("/api/admin/auto-generate-article", async (req, res) => {
+    try {
+      const { topic, categoryId } = req.body;
+
+      // Get category info if provided
+      let categoryName: string | undefined;
+      if (categoryId) {
+        const category = await storage.getCategoryById(categoryId);
+        categoryName = category?.name;
+      }
+
+      // Generate article with Gemini
+      const generatedArticle = await generateWorldClassArticle(topic, categoryName);
+
+      // Check if article with this slug already exists
+      const existing = await storage.getArticleBySlug(generatedArticle.slug);
+      if (existing) {
+        return res.status(409).json({ 
+          error: "Ya existe un artículo con este título. Intenta con otro tema." 
+        });
+      }
+
+      res.json({
+        success: true,
+        article: generatedArticle,
+      });
+    } catch (error) {
+      console.error("Error auto-generating article:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Error al generar el artículo" 
+      });
     }
   });
 

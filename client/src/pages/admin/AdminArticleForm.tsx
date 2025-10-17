@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Sparkles } from "lucide-react";
 
 const articleFormSchema = z.object({
   title: z.string().min(10, "El título debe tener al menos 10 caracteres"),
@@ -36,6 +37,8 @@ export default function AdminArticleForm() {
   const isEdit = !!match;
   const articleId = params?.id;
   const { toast } = useToast();
+  const [isAutoGenDialogOpen, setIsAutoGenDialogOpen] = useState(false);
+  const [autoGenTopic, setAutoGenTopic] = useState("");
 
   const { data: article } = useQuery<Article>({
     queryKey: ['/api/admin/articles', articleId],
@@ -123,6 +126,43 @@ export default function AdminArticleForm() {
       .replace(/(^-|-$)/g, "");
   };
 
+  const autoGenerateMutation = useMutation({
+    mutationFn: async (data: { topic?: string; categoryId?: string }) => {
+      return await apiRequest('POST', '/api/admin/auto-generate-article', data);
+    },
+    onSuccess: (data: any) => {
+      const article = data.article;
+      form.setValue('title', article.title);
+      form.setValue('slug', article.slug);
+      form.setValue('summary', article.summary);
+      form.setValue('content', article.content);
+      form.setValue('author', article.author);
+      
+      setIsAutoGenDialogOpen(false);
+      setAutoGenTopic("");
+      
+      toast({
+        title: "Artículo generado",
+        description: "El artículo ha sido generado exitosamente. Revisa y ajusta según sea necesario.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al generar",
+        description: error.message || "No se pudo generar el artículo automáticamente",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAutoGenerate = () => {
+    const categoryId = form.getValues('categoryId');
+    autoGenerateMutation.mutate({
+      topic: autoGenTopic || undefined,
+      categoryId: categoryId || undefined,
+    });
+  };
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -136,12 +176,70 @@ export default function AdminArticleForm() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver
         </Button>
-        <h1 className="text-3xl font-serif font-bold mb-2">
-          {isEdit ? 'Editar Artículo' : 'Nuevo Artículo'}
-        </h1>
-        <p className="text-muted-foreground">
-          {isEdit ? 'Modifica los detalles del artículo' : 'Crea un nuevo artículo para el portal'}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-bold mb-2">
+              {isEdit ? 'Editar Artículo' : 'Nuevo Artículo'}
+            </h1>
+            <p className="text-muted-foreground">
+              {isEdit ? 'Modifica los detalles del artículo' : 'Crea un nuevo artículo para el portal'}
+            </p>
+          </div>
+          
+          {!isEdit && (
+            <Dialog open={isAutoGenDialogOpen} onOpenChange={setIsAutoGenDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2" data-testid="button-auto-generate">
+                  <Sparkles className="h-4 w-4" />
+                  Generación Automática Premium
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Generar Artículo de Nivel Mundial</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Utiliza inteligencia artificial de Google Gemini para crear contenido editorial profesional de alta calidad.
+                  </p>
+                  <div>
+                    <FormLabel>Tema del artículo (opcional)</FormLabel>
+                    <Input
+                      value={autoGenTopic}
+                      onChange={(e) => setAutoGenTopic(e.target.value)}
+                      placeholder="Ej: Análisis del presupuesto 2025, Reforma judicial..."
+                      className="mt-2"
+                      data-testid="input-auto-gen-topic"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Si no especificas un tema, se generará un artículo sobre política argentina actual
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsAutoGenDialogOpen(false);
+                      setAutoGenTopic("");
+                    }}
+                    disabled={autoGenerateMutation.isPending}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleAutoGenerate}
+                    disabled={autoGenerateMutation.isPending}
+                    data-testid="button-generate-confirm"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {autoGenerateMutation.isPending ? 'Generando...' : 'Generar Artículo'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       <Form {...form}>
