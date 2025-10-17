@@ -8,6 +8,7 @@ import MetricaHumana from "@/components/MetricaHumana";
 import TarjetaNoticiaHumana from "@/components/TarjetaNoticiaHumana";
 import DolarHistoryChart from "@/components/DolarHistoryChart";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import type { Article } from "@shared/schema";
 import { format } from "date-fns";
 
@@ -21,6 +22,8 @@ interface DolarData {
 }
 
 export default function Home() {
+  const [, navigate] = useLocation();
+  
   const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ['/api/articles'],
     staleTime: 30000,
@@ -147,6 +150,7 @@ export default function Home() {
                     credibilityScore={article.credibilityScore || 70}
                     category="Política"
                     impactoHumano="Esta noticia afecta a millones de argentinos que dependen de la estabilidad económica"
+                    onClick={() => navigate(`/articulo/${article.slug}`)}
                   />
                 ))}
               </div>

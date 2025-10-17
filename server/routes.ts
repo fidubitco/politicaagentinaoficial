@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { scrapeAllSources } from "./lib/scraper";
+import { generateArticles } from "./lib/article-generator";
 import { insertArticleSchema, insertSourceSchema, insertCategorySchema } from "@shared/schema";
 
 function generateSlug(title: string): string {
@@ -252,6 +253,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting category:", error);
       res.status(500).json({ error: "Failed to delete category" });
+    }
+  });
+
+  // Generate articles from templates
+  app.post("/api/admin/generate-articles", async (req, res) => {
+    try {
+      const { count = 30 } = req.body;
+      
+      // Create or get category
+      let category = await storage.getCategoryBySlug("escandalo-judicial");
+      if (!category) {
+        category = await storage.createCategory({
+          name: "Escándalo Judicial",
+          slug: "escandalo-judicial",
+          description: "Noticias sobre casos judiciales de alto impacto y corrupción",
+        });
+      }
+
+      // Create or get source
+      let source = await storage.getSourceByName("Política Argentina");
+      if (!source) {
+        source = await storage.createSource({
+          name: "Política Argentina",
+          url: "https://politica-argentina.com",
+          logoUrl: null,
+          credibilityScore: 90,
+          isActive: true,
+        });
+      }
+
+      // Generate articles
+      const articleTemplates = generateArticles(source.id, category.id, count);
+      const createdArticles = [];
+
+      for (const template of articleTemplates) {
+        try {
+          // Check if article with this slug exists
+          const existing = await storage.getArticleBySlug(template.slug);
+          if (existing) {
+            console.log(`Article already exists: ${template.slug}`);
+            continue;
+          }
+
+          const article = await storage.createArticle(template as any);
+          createdArticles.push(article);
+        } catch (error) {
+          console.error(`Error creating article "${template.title}":`, error);
+        }
+      }
+
+      res.json({
+        success: true,
+        created: createdArticles.length,
+        total: articleTemplates.length,
+        articles: createdArticles,
+      });
+    } catch (error) {
+      console.error("Error generating articles:", error);
+      res.status(500).json({ error: "Failed to generate articles" });
     }
   });
 

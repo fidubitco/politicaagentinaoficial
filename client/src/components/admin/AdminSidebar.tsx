@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Radio, FolderTree, Calendar, Settings } from "lucide-react";
+import { LayoutDashboard, FileText, Radio, FolderTree, Calendar, Settings, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import {
   Sidebar,
@@ -25,6 +25,11 @@ const menuItems = [
     icon: FileText,
   },
   {
+    title: "Generador",
+    url: "/admin/generator",
+    icon: Sparkles,
+  },
+  {
     title: "Fuentes",
     url: "/admin/sources",
     icon: Radio,
@@ -33,11 +38,6 @@ const menuItems = [
     title: "Categorías",
     url: "/admin/categories",
     icon: FolderTree,
-  },
-  {
-    title: "Calendario",
-    url: "/admin/calendar",
-    icon: Calendar,
   },
 ];
 

@@ -11,6 +11,7 @@ import AdminArticles from "@/pages/admin/AdminArticles";
 import AdminArticleForm from "@/pages/admin/AdminArticleForm";
 import AdminSources from "@/pages/admin/AdminSources";
 import AdminCategories from "@/pages/admin/AdminCategories";
+import AdminGenerator from "@/pages/admin/AdminGenerator";
 import ArticlePage from "@/pages/ArticlePage";
 import NotFound from "@/pages/not-found";
 
@@ -79,6 +80,12 @@ function Router() {
       <Route path="/admin/categories">
         <AdminLayout>
           <AdminCategories />
+        </AdminLayout>
+      </Route>
+      
+      <Route path="/admin/generator">
+        <AdminLayout>
+          <AdminGenerator />
         </AdminLayout>
       </Route>
       
