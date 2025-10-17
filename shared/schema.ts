@@ -61,7 +61,9 @@ export const articles = pgTable("articles", {
   sourceId: varchar("source_id").references(() => sources.id),
   categoryId: varchar("category_id").references(() => categories.id),
   author: text("author"),
-  publishedAt: timestamp("published_at").notNull(),
+  status: text("status").notNull().default("published"), // draft | scheduled | published
+  publishedAt: timestamp("published_at"),
+  scheduledFor: timestamp("scheduled_for"),
   scrapedAt: timestamp("scraped_at").defaultNow().notNull(),
   viewCount: integer("view_count").default(0).notNull(),
   credibilityScore: integer("credibility_score"),

@@ -157,6 +157,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin API Routes
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const stats = await storage.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  app.get("/api/admin/articles/:id", async (req, res) => {
+    try {
+      const article = await storage.getArticleById(req.params.id);
+      if (!article) {
+        return res.status(404).json({ error: "Article not found" });
+      }
+      res.json(article);
+    } catch (error) {
+      console.error("Error fetching article:", error);
+      res.status(500).json({ error: "Failed to fetch article" });
+    }
+  });
+
+  app.post("/api/admin/articles", async (req, res) => {
+    try {
+      const article = await storage.createArticle(req.body);
+      res.status(201).json(article);
+    } catch (error) {
+      console.error("Error creating article:", error);
+      res.status(500).json({ error: "Failed to create article" });
+    }
+  });
+
+  app.put("/api/admin/articles/:id", async (req, res) => {
+    try {
+      const article = await storage.updateArticle(req.params.id, req.body);
+      res.json(article);
+    } catch (error) {
+      console.error("Error updating article:", error);
+      res.status(500).json({ error: "Failed to update article" });
+    }
+  });
+
+  app.delete("/api/admin/articles/:id", async (req, res) => {
+    try {
+      await storage.deleteArticle(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      res.status(500).json({ error: "Failed to delete article" });
+    }
+  });
+
+  app.put("/api/admin/sources/:id", async (req, res) => {
+    try {
+      const source = await storage.updateSource(req.params.id, req.body);
+      res.json(source);
+    } catch (error) {
+      console.error("Error updating source:", error);
+      res.status(500).json({ error: "Failed to update source" });
+    }
+  });
+
+  app.delete("/api/admin/sources/:id", async (req, res) => {
+    try {
+      await storage.deleteSource(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting source:", error);
+      res.status(500).json({ error: "Failed to delete source" });
+    }
+  });
+
+  app.put("/api/admin/categories/:id", async (req, res) => {
+    try {
+      const category = await storage.updateCategory(req.params.id, req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(500).json({ error: "Failed to update category" });
+    }
+  });
+
+  app.delete("/api/admin/categories/:id", async (req, res) => {
+    try {
+      await storage.deleteCategory(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ error: "Failed to delete category" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
