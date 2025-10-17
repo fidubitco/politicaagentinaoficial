@@ -6,9 +6,9 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        lg: ".5625rem", /* 9px */
-        md: ".375rem", /* 6px */
-        sm: ".1875rem", /* 3px */
+        lg: "0.125rem", /* 2px - minimal professional */
+        md: "0.125rem", /* 2px - minimal professional */
+        sm: "0.125rem", /* 2px - minimal professional */
       },
       colors: {
         // Flat / base colors (regular buttons)
@@ -83,8 +83,10 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
-        serif: ["Playfair Display", "Georgia", "serif"],
+        sans: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        serif: ["Georgia", "Times New Roman", "serif"],
+        display: ["Playfair Display", "Georgia", "serif"],
+        data: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
         mono: ["JetBrains Mono", "Menlo", "monospace"],
       },
       keyframes: {
