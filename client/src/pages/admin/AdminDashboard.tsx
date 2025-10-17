@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Radio, TrendingUp, CheckCircle, Eye, BarChart3, Folder, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import type { Article, Category } from "@shared/schema";
 
 interface Stats {
@@ -203,21 +204,33 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="/admin/articles/new" className="p-4 rounded-lg border hover-elevate active-elevate-2 transition-colors">
-              <FileText className="h-5 w-5 mb-2 text-primary" />
-              <h4 className="font-medium">Nuevo Artículo</h4>
-              <p className="text-xs text-muted-foreground mt-1">Crear contenido editorial</p>
-            </a>
-            <a href="/admin/generator" className="p-4 rounded-lg border hover-elevate active-elevate-2 transition-colors">
-              <Sparkles className="h-5 w-5 mb-2 text-primary" />
-              <h4 className="font-medium">Generador IA</h4>
-              <p className="text-xs text-muted-foreground mt-1">Crear con Gemini AI</p>
-            </a>
-            <a href="/admin/categories" className="p-4 rounded-lg border hover-elevate active-elevate-2 transition-colors">
-              <Folder className="h-5 w-5 mb-2 text-primary" />
-              <h4 className="font-medium">Categorías</h4>
-              <p className="text-xs text-muted-foreground mt-1">Gestionar taxonomía</p>
-            </a>
+            <Card className="hover-elevate active-elevate-2" data-testid="card-quick-new-article">
+              <Link href="/admin/articles/new">
+                <CardContent className="p-4 cursor-pointer">
+                  <FileText className="h-5 w-5 mb-2 text-primary" />
+                  <h4 className="font-medium">Nuevo Artículo</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Crear contenido editorial</p>
+                </CardContent>
+              </Link>
+            </Card>
+            <Card className="hover-elevate active-elevate-2" data-testid="card-quick-generator">
+              <Link href="/admin/generator">
+                <CardContent className="p-4 cursor-pointer">
+                  <Sparkles className="h-5 w-5 mb-2 text-primary" />
+                  <h4 className="font-medium">Generador IA</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Crear con Gemini AI</p>
+                </CardContent>
+              </Link>
+            </Card>
+            <Card className="hover-elevate active-elevate-2" data-testid="card-quick-categories">
+              <Link href="/admin/categories">
+                <CardContent className="p-4 cursor-pointer">
+                  <Folder className="h-5 w-5 mb-2 text-primary" />
+                  <h4 className="font-medium">Categorías</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Gestionar taxonomía</p>
+                </CardContent>
+              </Link>
+            </Card>
           </div>
         </CardContent>
       </Card>

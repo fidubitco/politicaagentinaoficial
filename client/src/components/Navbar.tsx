@@ -90,6 +90,17 @@ export default function Navbar() {
                 {cat}
               </Button>
             ))}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2 mt-4"
+              data-testid="mobile-button-admin"
+              asChild
+            >
+              <Link href="/admin">
+                <Settings className="h-4 w-4" />
+                Admin
+              </Link>
+            </Button>
           </div>
         </div>
       )}

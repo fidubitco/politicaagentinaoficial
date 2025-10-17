@@ -37,13 +37,13 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                 <p className="text-xs text-muted-foreground">POLÍTICA ARGENTINA</p>
               </div>
             </div>
-            <Link href="/">
-              <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-site">
+            <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-site" asChild>
+              <Link href="/">
                 <ExternalLink className="h-4 w-4" />
                 <span className="hidden sm:inline">Ver Sitio Público</span>
                 <span className="sm:hidden">Sitio</span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </header>
           <main className="flex-1 overflow-auto">
             {children}
