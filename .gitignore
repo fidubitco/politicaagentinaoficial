@@ -89,3 +89,4 @@ server/public
 .env.backup
 .vercel
 .turbo
+.env.railway
