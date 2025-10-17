@@ -6,6 +6,7 @@ import InsightsPanel from "@/components/InsightsPanel";
 import Footer from "@/components/Footer";
 import MetricaHumana from "@/components/MetricaHumana";
 import TarjetaNoticiaHumana from "@/components/TarjetaNoticiaHumana";
+import DolarHistoryChart from "@/components/DolarHistoryChart";
 import { useQuery } from "@tanstack/react-query";
 import type { Article } from "@shared/schema";
 import { format } from "date-fns";
@@ -94,7 +95,7 @@ export default function Home() {
               <p className="text-muted-foreground">Cómo te afecta el dólar en tu vida diaria</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               <MetricaHumana 
                 tipo="blue" 
                 dolarData={dolarData?.blue}
@@ -111,6 +112,8 @@ export default function Home() {
                 variacionDiaria={1.2}
               />
             </div>
+
+            <DolarHistoryChart />
           </div>
         </section>
 

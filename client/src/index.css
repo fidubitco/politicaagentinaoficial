@@ -69,10 +69,15 @@
 
   --muted-foreground: 220 10% 45%;
 
-  /* Data Teal Accent */
-  --accent: 185 65% 42%;
+  /* Argentine Celeste Accent */
+  --accent: 197 73% 66%;  /* #6CACE4 - Celeste Argentino */
 
   --accent-foreground: 0 0% 100%;
+  
+  /* Argentine Design Palette */
+  --argentina-celeste: 197 73% 66%;  /* #6CACE4 */
+  --argentina-amarillo: 43 93% 51%;  /* #F6B40E */
+  --argentina-tierra: 25 52% 31%;    /* #8B4513 */
 
   /* Alert Orange */
   --destructive: 25 95% 53%;
@@ -198,10 +203,15 @@
 
   --muted-foreground: 220 10% 65%;
 
-  /* Data Teal Accent - adjusted for dark */
-  --accent: 185 65% 48%;
+  /* Argentine Celeste Accent - adjusted for dark */
+  --accent: 197 73% 70%;  /* Celeste Argentino más brillante para dark mode */
 
-  --accent-foreground: 0 0% 100%;
+  --accent-foreground: 220 25% 8%;
+  
+  /* Argentine Design Palette - Dark Mode */
+  --argentina-celeste: 197 73% 70%;
+  --argentina-amarillo: 43 93% 55%;
+  --argentina-tierra: 25 52% 38%;
 
   /* Alert Orange */
   --destructive: 25 95% 58%;
