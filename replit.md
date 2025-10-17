@@ -12,6 +12,37 @@ Política Argentina is a premium political news and analysis portal built with c
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### October 2025 - Enhanced Navigation & Dashboard (Latest)
+
+**Navigation System Upgrade**:
+- Implemented bidirectional navigation between admin panel and public website
+- Admin header includes "Ver Sitio Público" button to preview the live site
+- Public navbar includes "Admin" button for quick access to management panel
+- Both desktop and mobile navigation fully functional with proper asChild patterns
+
+**Dynamic Category Navigation**:
+- Navbar now dynamically loads featured categories from database (top 6 by priority)
+- Category links route to dedicated CategoryPage at `/categoria/:slug`
+- CategoryPage displays filtered articles by category with custom header styling
+- Loading states with skeleton UI prevent flash of 404 errors
+- TanStack Query cache ensures instant navigation after first load
+
+**Enhanced Admin Dashboard**:
+- 6 comprehensive metrics cards: Total Artículos, Vistas Totales, Publicados Hoy, Categorías Activas, Fuentes Activas, Credibilidad Promedio
+- Top 5 categories ranked by article count with total views
+- Top 5 most viewed articles with engagement metrics
+- Quick Actions section with Card-based navigation to key admin functions
+- All metrics calculate dynamically from actual article and category data
+
+**Technical Improvements**:
+- All navigation buttons use Button asChild pattern (no nested interactive elements)
+- Comprehensive data-testid attributes on all interactive elements
+- Mobile-first responsive design with collapsible navigation
+- Color-coded category badges using database color values
+- Professional hover and active states using custom elevation utilities
+
 ## System Architecture
 
 ### Frontend Architecture
