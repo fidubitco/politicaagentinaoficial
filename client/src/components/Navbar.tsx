@@ -1,5 +1,6 @@
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, Settings } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -37,7 +38,7 @@ export default function Navbar() {
           </div>
 
           {/* Search Bar - Professional */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -47,6 +48,12 @@ export default function Navbar() {
                 data-testid="input-search"
               />
             </div>
+            <Link href="/admin">
+              <Button variant="outline" size="sm" className="gap-2" data-testid="button-admin">
+                <Settings className="h-4 w-4" />
+                Admin
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}

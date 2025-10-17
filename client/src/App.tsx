@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import Home from "@/pages/Home";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminArticles from "@/pages/admin/AdminArticles";
@@ -26,8 +29,21 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-full">
         <AdminSidebar />
         <div className="flex flex-col flex-1">
-          <header className="flex items-center justify-between p-4 border-b">
-            <SidebarTrigger data-testid="button-sidebar-toggle" />
+          <header className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <div className="hidden sm:block">
+                <h2 className="text-sm font-semibold">Panel de Administración</h2>
+                <p className="text-xs text-muted-foreground">POLÍTICA ARGENTINA</p>
+              </div>
+            </div>
+            <Link href="/">
+              <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-site">
+                <ExternalLink className="h-4 w-4" />
+                <span className="hidden sm:inline">Ver Sitio Público</span>
+                <span className="sm:hidden">Sitio</span>
+              </Button>
+            </Link>
           </header>
           <main className="flex-1 overflow-auto">
             {children}
