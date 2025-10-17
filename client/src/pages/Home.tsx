@@ -1,16 +1,13 @@
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import LiveMetricsTicker from "@/components/LiveMetricsTicker";
-import CategorySection from "@/components/CategorySection";
-import InsightsPanel from "@/components/InsightsPanel";
 import Footer from "@/components/Footer";
-import MetricaHumana from "@/components/MetricaHumana";
-import TarjetaNoticiaHumana from "@/components/TarjetaNoticiaHumana";
-import DolarHistoryChart from "@/components/DolarHistoryChart";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 import type { Article, Category } from "@shared/schema";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Eye, TrendingUp, Clock } from "lucide-react";
 
 interface DolarData {
   oficial: any;
@@ -22,15 +19,13 @@ interface DolarData {
 }
 
 export default function Home() {
-  const [, navigate] = useLocation();
-  
   const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ['/api/articles'],
     staleTime: 30000,
     refetchInterval: 30000,
   });
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
+  const { data: categories } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
     staleTime: 60000,
   });
@@ -41,176 +36,291 @@ export default function Home() {
     refetchInterval: 30000,
   });
 
-  const liveMetrics = dolarData ? [
-    { label: "Dólar Blue", value: `$${dolarData.blue?.venta?.toLocaleString('es-AR') || '---'}`, change: "+2.3%" },
-    { label: "Dólar Oficial", value: `$${dolarData.oficial?.venta?.toLocaleString('es-AR') || '---'}`, change: "-0.5%" },
-    { label: "MEP", value: `$${dolarData.mep?.venta?.toLocaleString('es-AR') || '---'}`, change: "+1.2%" },
-    { label: "Tarjeta", value: `$${dolarData.tarjeta?.venta?.toLocaleString('es-AR') || '---'}`, change: "+45" }
-  ] : [
-    { label: "Dólar Blue", value: "Cargando...", change: "" },
-    { label: "Inflación", value: "---", change: "" },
-    { label: "Aprobación", value: "---", change: "" },
-    { label: "Riesgo País", value: "---", change: "" }
-  ];
+  // Get featured article (highest views) - NON-MUTATING
+  const featuredArticle = [...(articles || [])]
+    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))[0];
+  
+  // Get trending articles (by views) - NON-MUTATING
+  const trendingArticles = [...(articles || [])]
+    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+    .slice(0, 8);
+  
+  // Get latest articles (by published date, most recent first) - NON-MUTATING
+  const latestArticles = [...(articles || [])]
+    .sort((a, b) => {
+      const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return dateB - dateA; // Descending (most recent first)
+    })
+    .slice(0, 12);
+  
+  // Get main articles (top 3 by views, excluding featured)
+  const mainArticles = [...(articles || [])]
+    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+    .slice(1, 4);
 
-  // Get featured categories sorted by priority
-  const featuredCategories = categories
-    ?.filter(cat => cat.isFeatured)
-    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-    .slice(0, 4) || [];
-
-  // Function to get articles by category
-  const getArticlesByCategory = (categoryId: string) => {
-    return articles?.filter(article => article.categoryId === categoryId).slice(0, 3) || [];
-  };
-
-  // Editorial Insights
-  const electoralInsights = [
-    { scenario: "Victoria 1ra Vuelta", probability: 42, trend: "up" as const },
-    { scenario: "Ballotage Necesario", probability: 38, trend: "stable" as const },
-    { scenario: "Sorpresa Electoral", probability: 20, trend: "down" as const }
-  ];
-
-  const economicInsights = [
-    { scenario: "Dólar Estable", probability: 55, trend: "up" as const },
-    { scenario: "Volatilidad Media", probability: 30, trend: "stable" as const },
-    { scenario: "Alta Volatilidad", probability: 15, trend: "down" as const }
-  ];
+  // Loading state
+  if (articlesLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 py-12">
+          <div className="animate-pulse space-y-8">
+            <div className="h-[500px] bg-muted rounded"></div>
+            <div className="grid grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => <div key={i} className="h-96 bg-muted rounded"></div>)}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <LiveMetricsTicker metrics={liveMetrics} />
-      <Hero />
       
-      {/* Main Content */}
-      <main>
-        {/* Métricas Humanizadas del Dólar */}
-        <section className="py-12 bg-gradient-to-br from-[#6CACE4]/5 via-background to-[#F6B40E]/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-serif font-bold mb-2">Economía Real</h2>
-              <p className="text-muted-foreground">Cómo te afecta el dólar en tu vida diaria</p>
+      {/* Live Breaking News Ticker */}
+      {dolarData && (
+        <div className="bg-[hsl(355,70%,48%)] text-white py-2 px-4">
+          <div className="max-w-[1440px] mx-auto flex items-center gap-8 text-sm overflow-hidden">
+            <div className="flex items-center gap-2 font-semibold shrink-0">
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+              EN VIVO
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <MetricaHumana 
-                tipo="blue" 
-                dolarData={dolarData?.blue}
-                variacionDiaria={2.3}
-              />
-              <MetricaHumana 
-                tipo="oficial" 
-                dolarData={dolarData?.oficial}
-                variacionDiaria={-0.5}
-              />
-              <MetricaHumana 
-                tipo="mep" 
-                dolarData={dolarData?.mep}
-                variacionDiaria={1.2}
-              />
+            <div className="flex gap-8 animate-scroll">
+              <span>Dólar Blue: ${dolarData.blue?.venta?.toLocaleString('es-AR')}</span>
+              <span>Dólar Oficial: ${dolarData.oficial?.venta?.toLocaleString('es-AR')}</span>
+              <span>MEP: ${dolarData.mep?.venta?.toLocaleString('es-AR')}</span>
+              <span>Tarjeta: ${dolarData.tarjeta?.venta?.toLocaleString('es-AR')}</span>
             </div>
-
-            <DolarHistoryChart />
           </div>
-        </section>
+        </div>
+      )}
 
-        {/* Secciones por Categoría Editorial */}
-        {featuredCategories.length > 0 && featuredCategories.map((category) => {
-          const categoryArticles = getArticlesByCategory(category.id);
-          
-          if (categoryArticles.length === 0) return null;
-          
-          return (
-            <section key={category.id} className="py-16 border-t border-border">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-8 pb-4 flex items-center justify-between border-b-2" style={{ borderColor: category.color || '#6CACE4' }}>
-                  <div>
-                    <h2 className="text-3xl font-serif font-bold" style={{ color: category.color || '#6CACE4' }}>
-                      {category.name}
-                    </h2>
-                    <p className="text-muted-foreground mt-2">{category.description}</p>
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16">
+        {/* Hero Section - Immersive Lead Story */}
+        {featuredArticle && (
+          <section className="py-8">
+            <Link href={`/articulo/${featuredArticle.slug}`}>
+              <div className="relative aspect-[16/9] lg:aspect-[21/9] rounded-lg overflow-hidden group cursor-pointer">
+                {featuredArticle.imageUrl ? (
+                  <img 
+                    src={featuredArticle.imageUrl} 
+                    alt={featuredArticle.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    data-testid="img-hero-article"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted"></div>
+                )}
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                
+                {/* Hero Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-12 text-white">
+                  <div className="max-w-4xl">
+                    {featuredArticle.categoryId && categories && (
+                      <Badge 
+                        className="mb-4 bg-[hsl(355,70%,48%)] text-white hover:bg-[hsl(355,70%,45%)]"
+                        data-testid="badge-hero-category"
+                      >
+                        {categories.find(c => c.id === featuredArticle.categoryId)?.name || 'Noticias'}
+                      </Badge>
+                    )}
+                    <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight" data-testid="text-hero-title">
+                      {featuredArticle.title}
+                    </h1>
+                    {featuredArticle.summary && (
+                      <p className="text-lg lg:text-xl opacity-90 mb-4 line-clamp-2" data-testid="text-hero-summary">
+                        {featuredArticle.summary}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 text-sm opacity-80">
+                      {featuredArticle.publishedAt && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>{format(new Date(featuredArticle.publishedAt), "d 'de' MMMM", { locale: es })}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{(featuredArticle.viewCount || 0).toLocaleString('es-AR')} vistas</span>
+                      </div>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => navigate(`/categoria/${category.slug}`)}
-                    className="text-sm font-medium hover:underline"
-                    style={{ color: category.color || '#6CACE4' }}
-                    data-testid={`link-ver-mas-${category.slug}`}
-                  >
-                    Ver más →
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categoryArticles.map((article) => (
-                    <TarjetaNoticiaHumana
-                      key={article.id}
-                      title={article.title}
-                      summary={article.summary || article.content.slice(0, 150) + '...'}
-                      imageUrl={article.imageUrl || undefined}
-                      publishedAt={article.publishedAt || new Date().toISOString()}
-                      author={article.author || undefined}
-                      source={article.sourceId || "Redacción"}
-                      credibilityScore={article.credibilityScore || 70}
-                      category={category.name}
-                      impactoHumano="Esta noticia afecta a millones de argentinos"
-                      onClick={() => navigate(`/articulo/${article.slug}`)}
-                    />
-                  ))}
                 </div>
               </div>
-            </section>
-          );
-        })}
-
-        {/* Fallback si no hay categorías o artículos */}
-        {(!featuredCategories.length || !articles?.length) && (
-          <section className="py-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  {categoriesLoading || articlesLoading 
-                    ? "Cargando contenido..." 
-                    : "No hay noticias disponibles. Ejecuta el generador de artículos en el panel de administración."}
-                </p>
-              </div>
-            </div>
+            </Link>
           </section>
         )}
 
-        {/* Editorial Insights Section - Bloomberg Style */}
-        <section className="py-16 bg-muted/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 pb-4 border-b-2 border-accent">
-              <h2 className="text-3xl font-serif font-bold">Inteligencia Editorial</h2>
-              <p className="text-muted-foreground mt-2">
-                Análisis predictivo basado en modelos avanzados con 5000+ variables
-              </p>
+        {/* Main Grid - 8 col main + 4 col sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-12">
+          {/* Main Column */}
+          <div className="lg:col-span-8">
+            {/* Top Stories Grid */}
+            <div className="mb-12">
+              <h2 className="font-serif text-3xl font-bold mb-6">Principales Noticias</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {mainArticles.map((article) => (
+                  <Link key={article.id} href={`/articulo/${article.slug}`}>
+                    <Card className="h-full hover-elevate active-elevate-2 transition-all duration-300" data-testid={`card-main-article-${article.slug}`}>
+                      {article.imageUrl && (
+                        <div className="aspect-video overflow-hidden">
+                          <img 
+                            src={article.imageUrl} 
+                            alt={article.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      )}
+                      <CardContent className="p-6">
+                        {article.categoryId && categories && (
+                          <Badge 
+                            style={{ backgroundColor: categories.find(c => c.id === article.categoryId)?.color || '#6CACE4' }}
+                            className="text-white mb-3"
+                          >
+                            {categories.find(c => c.id === article.categoryId)?.name}
+                          </Badge>
+                        )}
+                        <h3 className="font-serif text-2xl font-bold mb-3 line-clamp-2 hover:text-[hsl(355,70%,48%)] transition-colors">
+                          {article.title}
+                        </h3>
+                        {article.summary && (
+                          <p className="text-muted-foreground mb-4 line-clamp-3">
+                            {article.summary}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          {article.publishedAt && (
+                            <span>{format(new Date(article.publishedAt), "d MMM", { locale: es })}</span>
+                          )}
+                          <span>•</span>
+                          <span>{(article.viewCount || 0).toLocaleString('es-AR')} vistas</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <InsightsPanel
-                title="Escenarios Electorales 2025"
-                insights={electoralInsights}
-              />
-              <InsightsPanel
-                title="Proyección Económica"
-                insights={economicInsights}
-              />
-              
-              {/* CTA Card */}
-              <div className="p-8 rounded-sm bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 flex flex-col justify-center">
-                <h3 className="text-2xl font-serif font-bold mb-4">Dashboard Completo</h3>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Accede a visualizaciones avanzadas, predicciones en tiempo real y análisis profundo
-                </p>
-                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-sm font-semibold hover-elevate active-elevate-2 transition-all" data-testid="button-dashboard-access">
-                  Explorar Dashboard →
-                </button>
+
+            {/* Latest Articles List */}
+            <div>
+              <h2 className="font-serif text-3xl font-bold mb-6">Últimas Noticias</h2>
+              <div className="space-y-6">
+                {latestArticles.map((article) => (
+                  <Link key={article.id} href={`/articulo/${article.slug}`}>
+                    <Card className="hover-elevate active-elevate-2 transition-all duration-300" data-testid={`card-latest-${article.slug}`}>
+                      <CardContent className="p-6">
+                        <div className="flex gap-6">
+                          {article.imageUrl && (
+                            <div className="w-48 h-32 shrink-0 overflow-hidden rounded">
+                              <img 
+                                src={article.imageUrl} 
+                                alt={article.title}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            {article.categoryId && categories && (
+                              <Badge 
+                                style={{ backgroundColor: categories.find(c => c.id === article.categoryId)?.color || '#6CACE4' }}
+                                className="text-white mb-2"
+                              >
+                                {categories.find(c => c.id === article.categoryId)?.name}
+                              </Badge>
+                            )}
+                            <h3 className="font-serif text-xl font-bold mb-2 line-clamp-2 hover:text-[hsl(355,70%,48%)] transition-colors">
+                              {article.title}
+                            </h3>
+                            {article.summary && (
+                              <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                                {article.summary}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              {article.publishedAt && (
+                                <span>{format(new Date(article.publishedAt), "d 'de' MMMM", { locale: es })}</span>
+                              )}
+                              <span>•</span>
+                              <span>{(article.viewCount || 0).toLocaleString('es-AR')} vistas</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
-        </section>
+
+          {/* Sidebar - Live Intelligence */}
+          <div className="lg:col-span-4">
+            {/* Trending Topics */}
+            <div className="sticky top-24">
+              <Card className="mb-6">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-6">
+                    <TrendingUp className="h-5 w-5 text-[hsl(355,70%,48%)]" />
+                    <h3 className="font-serif text-xl font-bold">Más Leídas</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {trendingArticles.map((article, index) => (
+                      <Link key={article.id} href={`/articulo/${article.slug}`}>
+                        <div className="flex gap-4 group cursor-pointer" data-testid={`trending-item-${index + 1}`}>
+                          <div className="font-mono text-2xl font-bold text-[hsl(355,70%,48%)] shrink-0 w-8">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-[hsl(355,70%,48%)] transition-colors mb-1">
+                              {article.title}
+                            </h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Eye className="h-3 w-3" />
+                              <span>{(article.viewCount || 0).toLocaleString('es-AR')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Live Updates */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-2 h-2 rounded-full bg-[hsl(355,70%,48%)] animate-pulse"></div>
+                    <h3 className="font-serif text-xl font-bold">Actualizaciones en Vivo</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {latestArticles.slice(0, 5).map((article) => (
+                      <Link key={article.id} href={`/articulo/${article.slug}`}>
+                        <div className="border-l-2 border-[hsl(355,70%,48%)] pl-4 py-2 hover-elevate transition-all cursor-pointer">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {article.publishedAt && format(new Date(article.publishedAt), "HH:mm", { locale: es })}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium line-clamp-2 hover:text-[hsl(355,70%,48%)] transition-colors">
+                            {article.title}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </main>
 
       <Footer />

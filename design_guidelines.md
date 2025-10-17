@@ -1,201 +1,185 @@
-# Design Guidelines: POLÍTICA ARGENTINA - Premium Editorial Intelligence Portal
+# Design Guidelines: POLÍTICA ARGENTINA - World-Class Editorial Intelligence Portal
 
-## Design Approach: Professional Editorial Excellence
+## Design Approach: Premium Digital Journalism
 
-**Selected Approach**: Premium Editorial Design System - A sophisticated fusion of world-class journalism design (CNN International, Bloomberg News, The New York Times) with advanced AI-powered political intelligence.
+**Selected Approach**: Elite Editorial Design System - Synthesizing visual excellence from NYT (serif typography, editorial hierarchy), Bloomberg (data visualization), Financial Times (sophisticated restraint), La Nación + Clarín (Argentine journalistic authority).
 
-**Design Philosophy**: "Authoritative Intelligence" - Deliver cutting-edge predictive analytics and data-driven insights through a refined, credible editorial presentation that commands trust and professional respect.
+**Design Philosophy**: "Authoritative Clarity" - Deliver political intelligence through impeccable editorial design that commands instant credibility and professional trust.
 
 ---
 
 ## Color Palette
 
-### Light Mode Primary (Editorial White)
-- **Background Base**: 30 15% 97% (Warm off-white, NYT-inspired)
-- **Surface Elevated**: 0 0% 100% (Pure white for cards/panels)
-- **Text Primary**: 220 20% 15% (Rich charcoal for body text)
-- **Text Secondary**: 220 10% 45% (Muted grey for metadata)
+### Light Mode (Editorial Precision)
+- **Background Base**: 0 0% 100% (Pure white, FT-inspired)
+- **Surface Elevated**: 0 0% 98% (Subtle off-white for cards)
+- **Text Primary**: 0 0% 10% (Deep black, maximum readability)
+- **Text Secondary**: 0 0% 45% (Mid-gray for metadata)
+- **Border Subtle**: 0 0% 90% (Light dividers)
 
-### Dark Mode Primary (Professional Night)
-- **Background Base**: 220 25% 8% (Deep navy-charcoal)
-- **Surface Elevated**: 220 20% 12% (Elevated dark panels)
-- **Text Primary**: 0 0% 95% (Crisp white for readability)
-- **Text Secondary**: 220 10% 65% (Muted light grey)
+### Dark Mode (Professional Night)
+- **Background Base**: 220 20% 8% (Rich charcoal-navy)
+- **Surface Elevated**: 220 15% 12% (Elevated panels)
+- **Text Primary**: 0 0% 95% (Crisp white)
+- **Text Secondary**: 0 0% 65% (Muted gray)
+- **Border Subtle**: 220 10% 20% (Dark dividers)
 
-### Editorial Accent Colors
-- **Primary Crimson**: 355 75% 45% (Editorial red for breaking news, primary actions - CNN-inspired)
-- **Secondary Navy**: 220 50% 25% (Deep editorial blue for headers, trust signals)
-- **Data Teal**: 185 65% 42% (Bloomberg-inspired for financial/data visualization)
-- **Alert Orange**: 25 95% 53% (Breaking alerts, urgent indicators)
-- **Success Green**: 145 70% 41% (Positive metrics, confirmations)
-
-### Neutral Grays (Sophisticated Scale)
-- **Border Light**: 220 15% 88% (Subtle dividers in light mode)
-- **Border Dark**: 220 15% 22% (Subtle dividers in dark mode)
-- **Muted Background**: 220 12% 95% (Light mode subtle panels)
-- **Hover Overlay**: rgba(0, 0, 0, 0.04) light / rgba(255, 255, 255, 0.06) dark
+### Editorial Accents
+- **Primary Crimson**: 355 70% 48% (Breaking news, CTAs, editorial emphasis)
+- **Data Teal**: 185 60% 45% (Charts, financial metrics)
+- **Alert Amber**: 30 95% 55% (Urgent updates, live indicators)
+- **Success Sage**: 145 40% 50% (Positive metrics)
+- **Navy Deep**: 220 50% 25% (Section headers, trust signals)
 
 ---
 
 ## Typography
 
-### Font Families
-- **Display/Headlines**: Playfair Display (serif) - Authoritative, elegant, NYT-inspired
-- **UI/Navigation**: Inter (sans-serif) - Clean, modern, Bloomberg-inspired
-- **Body Text**: Georgia fallback to Playfair for articles, Inter for UI
-- **Monospace/Data**: JetBrains Mono for financial data, code blocks
+### Font System
+- **Headlines/Display**: Playfair Display (700/600) - Editorial authority
+- **UI/Body Sans**: Inter (400/500/600) - Modern clarity
+- **Data/Mono**: JetBrains Mono - Financial precision
 
-### Type Scale (Editorial Hierarchy)
-- **Display Headlines**: 48px/52px (3rem), Playfair Display, font-weight: 700
-- **Section Headers**: 32px/40px (2rem), Playfair Display, font-weight: 700
-- **Article Headlines**: 28px/36px (1.75rem), Playfair Display, font-weight: 600
-- **Subheadings**: 20px/28px (1.25rem), Inter, font-weight: 600
-- **Body Serif**: 18px/28px (1.125rem), Playfair Display, font-weight: 400
-- **Body Sans**: 16px/24px (1rem), Inter, font-weight: 400
-- **Meta/Caption**: 14px/20px (0.875rem), Inter, font-weight: 400
-- **Small Print**: 12px/18px (0.75rem), Inter, font-weight: 400
-
-### Typography Rules
-- Article headlines always use Playfair Display serif
-- UI elements, buttons, navigation use Inter sans-serif
-- Generous line-height (1.6-1.8) for body text readability
-- Letter-spacing: -0.02em for large headlines, 0 for body
+### Scale (Editorial Hierarchy)
+- **Hero Display**: 56px/64px, Playfair Display 700 (desktop) / 36px/44px (mobile)
+- **Main Headlines**: 40px/48px, Playfair Display 700
+- **Section Headers**: 32px/40px, Playfair Display 600
+- **Article Titles**: 24px/32px, Playfair Display 600
+- **Subheads**: 20px/28px, Inter 600
+- **Body Text**: 18px/30px, Inter 400 (articles) / 16px/24px (UI)
+- **Metadata**: 14px/20px, Inter 500
+- **Captions**: 13px/18px, Inter 400
 
 ---
 
 ## Layout System
 
-### Grid Architecture (Tri-Column Editorial)
-- **Desktop Layout**: 3-column grid (Lead: 60%, Rail: 40% for homepage)
-- **Article Layout**: Wide column (700px) + narrow info rail (300px)
-- **Section Grids**: Modular 3-column for story index, 2-column for analysis
-- **Mobile**: Single column with collapsible navigation
+### Asymmetric Grid Architecture
+- **Homepage Hero**: 8-column main + 4-column sidebar (desktop), full-width (mobile)
+- **Main Content**: 65% primary column + 35% trending/live sidebar
+- **Article Layout**: 700px main text + 350px info/related rail
+- **Section Grids**: 3-column cards (desktop) → 2-column (tablet) → 1-column (mobile)
+- **Breaking Banner**: Full-width sticky top bar (40px height)
 
-### Spacing Primitives (NYT-inspired Generous Whitespace)
-- **Container padding**: 24px (mobile), 48px (tablet), 64px (desktop)
-- **Section spacing**: 64px (mobile), 96px (tablet), 128px (desktop)
-- **Card gaps**: 24px (mobile), 32px (desktop)
-- **Element spacing**: 16px, 24px, 32px, 48px
-- **Line containers**: max-w-7xl (1280px) centered
+### Spacing System (Generous Editorial)
+- **Core Units**: 4px base, multiply by 2/4/6/8/12/16/20/24
+- **Section Gaps**: 96px (desktop), 64px (tablet), 48px (mobile)
+- **Card Padding**: 32px (desktop), 24px (mobile)
+- **Container Max**: 1440px with 64px horizontal padding
+- **Reading Width**: 700px max for article bodies
 
 ### Responsive Breakpoints
-- Mobile: 320px - 767px
-- Tablet: 768px - 1023px
-- Desktop: 1024px - 1439px
-- Large: 1440px+
+- Mobile: 640px / Tablet: 1024px / Desktop: 1280px / XL: 1440px
 
 ---
 
 ## Component Library
 
-### Editorial Navigation
-- **Sticky Header**: Clean white/dark background, minimal borders, sticky on scroll
-- **Primary Nav**: Horizontal menu with serif category labels, hover underline
-- **Breaking News Ticker**: Red banner (crimson bg) for live updates, auto-scroll
-- **Search Bar**: Prominent, expandable, with autocomplete dropdown
-- **Secondary Nav**: Breadcrumbs for article pages, section navigation
+### Navigation & Header
+- **Sticky Masthead**: 72px height, white/dark background, subtle bottom border
+- **Logo**: Left-aligned, 180px width, Playfair Display wordmark
+- **Primary Nav**: Horizontal menu (Análisis, Economía, Internacional, Política), Inter 600, 16px
+- **Breaking Ticker**: Crimson banner above masthead, auto-scroll, white text, 36px height
+- **Search**: Prominent icon (top-right), expandable overlay with autocomplete
+- **Dark Mode Toggle**: Icon button, smooth transition, remembers preference
 
-### Hero Section (Lead Package)
-- **Featured Story**: Large image (16:9), bold serif headline (Display size), deck text, author/date metadata
-- **Secondary Stories**: 2-3 smaller stories in grid layout, image + headline + excerpt
-- **Editorial Badge**: "Análisis Exclusivo", "Predicción IA", "Breaking" labels
-- **No decorative effects**: Clean, content-first approach
+### Hero Section (Immersive Lead)
+- **Featured Story**: Full-width image (16:9, 1400x788px), gradient overlay (bottom 40%, black to transparent)
+- **Headline Overlay**: Bottom-left positioned, Playfair Display 56px, white text, max-width 800px
+- **Deck Text**: 20px Inter, white, 70% opacity, 2-line max
+- **Metadata Bar**: Author photo (32px circle), name, timestamp, category badge
+- **Secondary Grid**: 3 smaller stories below (image 3:2, headline 24px, excerpt 2-lines)
+- **CTA Buttons**: On hero have blurred background (backdrop-blur-md bg-white/10), white text
 
-### Article Cards (Professional)
-- **Image-First Layout**: High-quality photo, 16:9 or 3:2 aspect ratio
-- **Serif Headlines**: Playfair Display, 24-28px, bold, 2-line max
-- **Metadata Row**: Author (sans-serif), date, read time, category badge
-- **Excerpt**: 2 lines, Inter sans-serif, muted color
-- **Hover State**: Subtle elevation, headline color shift to crimson
-- **Border**: 1px subtle border in light mode, none in dark
+### Article Cards (Elevated Editorial)
+- **Standard Card**: White/dark elevated surface, 4px rounded corners, subtle shadow
+- **Image Treatment**: 16:9 aspect, sharp corners top, lazy-loaded, optimized WebP
+- **Category Badge**: Top-left absolute, crimson/teal pill, 12px Inter 600, uppercase
+- **Headline**: Playfair Display 24px, 2-line clamp, hover crimson underline
+- **Excerpt**: Inter 16px, muted color, 3-line clamp
+- **Metadata Row**: Author + date + read-time, 14px, icon + text pattern
+- **Hover State**: Lift 4px, shadow intensity increase, 0.3s smooth transition
 
-### Data Visualization (Bloomberg-Inspired)
-- **Insights Panels**: Clean white/dark cards with teal accent borders for data
-- **Chart Styles**: Line charts, bar graphs, minimal decoration, professional color palette
-- **Metrics Display**: Large numbers (32px), label below, trend indicator (arrow)
-- **Live Updates**: Pulsing indicator dot, timestamp, "LIVE" badge
-- **Tables**: Striped rows, monospace numbers, aligned right for data
+### Sidebar Components (Live Intelligence)
+- **Trending Topics**: Numbered list (1-10), bold numbers, headline links, update timestamp
+- **Live Updates Feed**: Pulsing red indicator, timestamp, headline, auto-refresh every 60s
+- **Poll Widget**: Question + options with percentage bars, teal accent, vote button
+- **Newsletter Signup**: Headline + email input + CTA, white/dark card, icon decoration
+- **Ad Placement**: Clearly labeled "Publicidad", 300x250px, bordered container
 
-### Interactive Features (Refined IA)
-- **Prediction Dashboard**: Clean cards showing scenarios, probability bars, confidence scores
-- **Electoral Maps**: Choropleth maps with professional color scales, hover tooltips
-- **Sentiment Analysis**: Text-based display with subtle background colors
-- **AI Insights Box**: Bordered panel with "IA Analysis" header, bullet points, confidence meter
-
----
-
-## Animations & Effects
-
-### Subtle Professional Animations
-- **Scroll Reveals**: Fade-up on scroll (20px translate), 0.4s ease-out
-- **Hover States**: Smooth color transitions (0.2s), subtle elevations (2-4px)
-- **Loading States**: Skeleton screens with subtle shimmer
-- **Page Transitions**: Cross-fade between pages (0.3s)
-
-### Performance Guidelines
-- **No heavy 3D effects**: Focus on content, not decoration
-- **Reduced motion support**: Respect prefers-reduced-motion
-- **60 FPS target**: Optimize all animations
-- **Progressive enhancement**: Core content works without JS
-
-### Interaction Patterns
-- **Click feedback**: Immediate visual response on buttons
-- **Focus states**: 2px outline in brand color, high contrast
-- **Disabled states**: 50% opacity, cursor: not-allowed
-- **Loading indicators**: Spinner or progress bar for async actions
+### Data Visualization (Bloomberg-Grade)
+- **Chart Cards**: Elevated panel, 24px padding, teal accent top-border
+- **Line/Bar Charts**: Minimal axes, data labels on hover, responsive scaling
+- **Metrics Display**: 48px number (JetBrains Mono), label below, trend arrow (green/red)
+- **Electoral Maps**: Choropleth with party colors, hover tooltips, province boundaries
+- **Tables**: Striped rows (subtle bg), right-aligned numbers, sticky headers on scroll
 
 ---
 
 ## Images & Media
 
 ### Editorial Photography
-- **Aspect Ratios**: 16:9 (standard), 3:2 (feature), 1:1 (profile)
-- **Quality**: High-resolution, journalistic style, professional composition
-- **Alt Text**: Descriptive, SEO-optimized, accessible
-- **Captions**: Below image, italic, smaller font, credit attribution
+- **Hero Images**: 1400x788px minimum, journalistic style, high emotional impact, human-focused when possible
+- **Card Images**: 800x450px (16:9) or 600x400px (3:2), sharp focus, professional composition
+- **Author Photos**: 80px circles (article headers), 32px (metadata), grayscale filter option
+- **Infographic Assets**: Vector SVGs for data stories, accessible color palettes
+- **Image Captions**: Below image, italic Inter 13px, photographer credit right-aligned
 
-### Data Visualizations
-- **Chart Export**: Static fallbacks for SEO, canvas-based interactivity
-- **Color Accessibility**: Colorblind-safe palettes, pattern fills as backup
-- **Responsive**: Mobile-optimized chart layouts, horizontal scroll for tables
-- **Labels**: Clear, readable, multilingual support (ES primary)
+### Placement Strategy
+- **Homepage Hero**: 1 large immersive image (political event, congressional scene, street protest)
+- **Section Heroes**: Smaller 800px width images per category
+- **Article Lead**: Full-width hero image with gradient overlay
+- **Inline Article Images**: 700px width max, centered, generous margin
+- **Sidebar**: Small thumbnails (120x80px) for trending stories
 
-### Video Integration
-- **Inline Players**: Custom controls matching design system
-- **Thumbnails**: High-quality poster frames, play button overlay
-- **Captions**: Available in Spanish, accessible controls
+### Technical Specs
+- **Format**: WebP with JPEG fallback, progressive loading
+- **Lazy Loading**: Below-fold images, intersection observer
+- **Alt Text**: Descriptive for SEO, screen reader optimized
+- **Responsive**: 3 sizes (mobile/tablet/desktop), srcset implementation
 
 ---
 
-## Accessibility & Responsiveness
+## Animations & Interactions
 
-### WCAG AAA Compliance
-- **Contrast Ratios**: 7:1 for body text, 4.5:1 minimum for all text
-- **Focus Indicators**: Visible, high contrast, never removed
-- **Keyboard Navigation**: Full site navigable without mouse
-- **Screen Readers**: Semantic HTML, ARIA labels, live regions for updates
+### Micro-Interactions (Refined)
+- **Scroll Reveals**: Fade-up 16px, 0.4s ease-out, stagger 100ms for card grids
+- **Hover States**: Color shift 0.2s, elevation change 0.3s, scale 1.02 for cards
+- **Loading States**: Skeleton screens (shimmer effect), progress bars for data fetch
+- **Sticky Elements**: Smooth lock on scroll, shadow appearance on stick
+- **Dark Mode Switch**: 0.3s cross-fade, smooth color transitions
 
-### Mobile Excellence
-- **Touch Targets**: Minimum 44x44px for all interactive elements
-- **Thumb Zones**: Critical actions in easy-to-reach areas
-- **Readable Text**: 16px minimum, no horizontal scroll
-- **Fast Loading**: Optimized images, lazy loading, code splitting
+### Performance Rules
+- **60 FPS Target**: GPU-accelerated transforms only, avoid layout thrashing
+- **Reduced Motion**: Disable animations for prefers-reduced-motion users
+- **Progressive Enhancement**: Core functionality works without JavaScript
 
-### Dark Mode (Professional)
-- **Automatic Detection**: Respects system preference
-- **Manual Toggle**: User can override, preference saved
-- **Consistent Hierarchy**: Same visual weight in both modes
-- **Reduced Eye Strain**: Lower contrast in dark mode (not pure black)
+---
+
+## Accessibility & Dark Mode
+
+### WCAG AAA Standards
+- **Contrast Ratios**: 7:1 body text, 4.5:1 minimum all elements
+- **Focus States**: 3px crimson outline, never removed, high visibility
+- **Keyboard Nav**: Tab order logical, skip links present, all interactive elements reachable
+- **Screen Readers**: Semantic HTML5, ARIA landmarks, live regions for breaking news
+
+### Dark Mode Excellence
+- **Automatic Detection**: System preference, localStorage override
+- **Toggle Placement**: Header right side, moon/sun icon, instant switch
+- **Consistent Hierarchy**: Same visual weight both modes, adjusted contrast only
+- **Image Handling**: 10% opacity overlay on images in dark mode for integration
 
 ---
 
 ## Key Differentiators
 
-1. **Editorial Credibility**: Design language of global news leaders (CNN, Bloomberg, NYT)
-2. **AI Integration**: Advanced predictive analytics presented professionally, not gimmicky
-3. **Typography Excellence**: Dual-font system (serif headlines, sans UI) for hierarchy and readability
-4. **Data Visualization**: Bloomberg-quality charts and insights, professionally styled
-5. **Performance**: Fast, accessible, works everywhere, progressive enhancement
-6. **Trust Signals**: Clean design, authoritative voice, transparent methodology
+1. **Asymmetric Editorial Grid**: NYT-inspired hierarchy with modern digital flexibility
+2. **Immersive Hero Imagery**: Full-width emotional storytelling, gradient overlays
+3. **Live Intelligence Sidebar**: Real-time updates, trending topics, interactive polls
+4. **Data Visualization Integration**: Bloomberg-quality charts as first-class content
+5. **Dual Typography System**: Serif authority (headlines) + sans clarity (UI/body)
+6. **Elevated Card Design**: Subtle shadows, hover animations, professional polish
+7. **Extreme Performance**: Lazy loading, WebP images, code splitting, edge caching for SEO
 
-This design system positions POLÍTICA ARGENTINA as Argentina's most credible and technologically advanced political intelligence platform, matching international standards while maintaining cutting-edge AI capabilities.
+This system establishes POLÍTICA ARGENTINA as Argentina's most visually sophisticated and technically advanced political news platform, matching international editorial standards while delivering cutting-edge digital journalism.
