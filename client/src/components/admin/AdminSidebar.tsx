@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Radio, FolderTree, Calendar, Settings, Sparkles, Zap } from "lucide-react";
+import { LayoutDashboard, FileText, Radio, FolderTree, Settings, Sparkles, Zap, BarChart3, Search, Brain, Globe } from "lucide-react";
 import { Link } from "wouter";
 import {
   Sidebar,
@@ -13,12 +13,30 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const menuItems = [
+const dashboardItems = [
   {
     title: "Dashboard",
     url: "/admin",
     icon: LayoutDashboard,
   },
+  {
+    title: "Analytics",
+    url: "/admin/analytics",
+    icon: BarChart3,
+  },
+  {
+    title: "SEO Audit",
+    url: "/admin/seo",
+    icon: Search,
+  },
+  {
+    title: "AI Assistant",
+    url: "/admin/ai-assistant",
+    icon: Brain,
+  },
+];
+
+const contentItems = [
   {
     title: "Artículos",
     url: "/admin/articles",
@@ -34,6 +52,9 @@ const menuItems = [
     url: "/admin/bulk-generator",
     icon: Zap,
   },
+];
+
+const settingsItems = [
   {
     title: "Fuentes",
     url: "/admin/sources",
@@ -56,10 +77,46 @@ export function AdminSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {dashboardItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel>Gestión de Contenido</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {contentItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Configuración</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>

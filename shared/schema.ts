@@ -104,3 +104,20 @@ export const insertTranslationSchema = createInsertSchema(translations).omit({
 
 export type InsertTranslation = z.infer<typeof insertTranslationSchema>;
 export type Translation = typeof translations.$inferSelect;
+
+export const categoryTranslations = pgTable("category_translations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").references(() => categories.id).notNull(),
+  locale: text("locale").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCategoryTranslationSchema = createInsertSchema(categoryTranslations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCategoryTranslation = z.infer<typeof insertCategoryTranslationSchema>;
+export type CategoryTranslation = typeof categoryTranslations.$inferSelect;

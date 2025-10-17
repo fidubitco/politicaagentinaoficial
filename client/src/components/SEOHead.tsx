@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface SEOHeadProps {
   title: string;
@@ -13,6 +14,8 @@ interface SEOHeadProps {
     tags?: string[];
   };
   canonical?: string;
+  slug?: string; // For generating hreflang URLs
+  type?: 'home' | 'article' | 'category' | 'page';
 }
 
 export function SEOHead({
@@ -22,10 +25,28 @@ export function SEOHead({
   image = "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200",
   article,
   canonical,
+  slug,
+  type = 'page',
 }: SEOHeadProps) {
+  const { locale } = useLocale();
   const siteUrl = import.meta.env.VITE_SITE_URL || "https://politica-argentina.replit.app";
   const fullTitle = `${title} | POLÍTICA ARGENTINA`;
   const canonicalUrl = canonical || siteUrl;
+
+  // Generate hreflang URLs
+  const supportedLocales = ['es', 'en', 'pt', 'fr', 'de', 'it', 'ja', 'zh', 'ru', 'ar'];
+  const getHreflangUrl = (lang: string) => {
+    if (type === 'home') {
+      return lang === 'es' ? siteUrl : `${siteUrl}/${lang}`;
+    }
+    if (type === 'article' && slug) {
+      return lang === 'es' ? `${siteUrl}/articulo/${slug}` : `${siteUrl}/${lang}/articulo/${slug}`;
+    }
+    if (type === 'category' && slug) {
+      return lang === 'es' ? `${siteUrl}/categoria/${slug}` : `${siteUrl}/${lang}/categoria/${slug}`;
+    }
+    return lang === 'es' ? canonicalUrl : `${siteUrl}/${lang}${canonical?.replace(siteUrl, '') || ''}`;
+  };
 
   const jsonLd = article
     ? {
@@ -72,6 +93,12 @@ export function SEOHead({
       {keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
       <link rel="canonical" href={canonicalUrl} />
 
+      {/* Hreflang Tags for Multilingual SEO */}
+      {supportedLocales.map((lang) => (
+        <link key={lang} rel="alternate" hrefLang={lang} href={getHreflangUrl(lang)} />
+      ))}
+      <link rel="alternate" hrefLang="x-default" href={getHreflangUrl('es')} />
+
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={article ? "article" : "website"} />
       <meta property="og:url" content={canonicalUrl} />
@@ -79,7 +106,7 @@ export function SEOHead({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content="POLÍTICA ARGENTINA" />
-      <meta property="og:locale" content="es_AR" />
+      <meta property="og:locale" content={locale === 'es' ? 'es_AR' : `${locale}_${locale.toUpperCase()}`} />
 
       {article && (
         <>

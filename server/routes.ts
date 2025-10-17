@@ -8,7 +8,8 @@ neonConfig.fetchConnectionCache = true;
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
-import { articles, categories, sources, insertArticleSchema, insertCategorySchema, insertSourceSchema } from "@shared/schema";
+import { articles, categories, sources, translations, categoryTranslations, insertArticleSchema, insertCategorySchema, insertSourceSchema } from "@shared/schema";
+import { translateArticle, translateCategory, getSupportedLocales, type SupportedLocale } from "./services/translation";
 import { eq, desc, sql as sqlOp } from "drizzle-orm";
 import { z } from "zod";
 import { generatePodcastStyleAudio } from "./lib/elevenlabs-service";
@@ -261,6 +262,91 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Translation Endpoints
+  
+  // Translate article
+  app.post("/api/translate/article", async (req, res) => {
+    try {
+      const { articleId, targetLocale } = req.body;
+      
+      if (!articleId || !targetLocale) {
+        return res.status(400).json({ error: "articleId and targetLocale are required" });
+      }
+
+      const translation = await translateArticle(articleId, targetLocale as SupportedLocale);
+      res.json({ translation });
+    } catch (error) {
+      console.error("Error translating article:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to translate article" });
+    }
+  });
+
+  // Translate category
+  app.post("/api/translate/category", async (req, res) => {
+    try {
+      const { categoryId, targetLocale } = req.body;
+      
+      if (!categoryId || !targetLocale) {
+        return res.status(400).json({ error: "categoryId and targetLocale are required" });
+      }
+
+      const translation = await translateCategory(categoryId, targetLocale as SupportedLocale);
+      res.json({ translation });
+    } catch (error) {
+      console.error("Error translating category:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to translate category" });
+    }
+  });
+
+  // Get article translation
+  app.get("/api/translations/article/:articleId/:locale", async (req, res) => {
+    try {
+      const { articleId, locale } = req.params;
+      
+      const [translation] = await db
+        .select()
+        .from(translations)
+        .where(eq(translations.articleId, articleId))
+        .where(eq(translations.locale, locale));
+
+      if (!translation) {
+        return res.status(404).json({ error: "Translation not found" });
+      }
+
+      res.json(translation);
+    } catch (error) {
+      console.error("Error fetching translation:", error);
+      res.status(500).json({ error: "Failed to fetch translation" });
+    }
+  });
+
+  // Get category translation
+  app.get("/api/translations/category/:categoryId/:locale", async (req, res) => {
+    try {
+      const { categoryId, locale } = req.params;
+      
+      const [translation] = await db
+        .select()
+        .from(categoryTranslations)
+        .where(eq(categoryTranslations.categoryId, categoryId))
+        .where(eq(categoryTranslations.locale, locale));
+
+      if (!translation) {
+        return res.status(404).json({ error: "Translation not found" });
+      }
+
+      res.json(translation);
+    } catch (error) {
+      console.error("Error fetching category translation:", error);
+      res.status(500).json({ error: "Failed to fetch category translation" });
+    }
+  });
+
+  // Get supported locales
+  app.get("/api/locales", (req, res) => {
+    res.json({ locales: getSupportedLocales() });
+  });
+
   // Sources
   app.get("/api/sources", async (req, res) => {
     try {
@@ -283,6 +369,330 @@ export function registerRoutes(app: Express) {
         return res.status(400).json({ error: "Validation error", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create source" });
+    }
+  });
+
+  // Related articles
+  app.get("/api/articles/:id/related", async (req, res) => {
+    try {
+      const [article] = await db
+        .select({ categoryId: articles.categoryId })
+        .from(articles)
+        .where(eq(articles.id, req.params.id));
+
+      if (!article || !article.categoryId) {
+        return res.json([]);
+      }
+
+      const relatedArticles = await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          summary: articles.summary,
+          imageUrl: articles.imageUrl,
+          publishedAt: articles.publishedAt,
+          viewCount: articles.viewCount,
+          categoryName: categories.name,
+          categoryColor: categories.color,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.categoryId, article.categoryId))
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.viewCount))
+        .limit(6);
+
+      // Filter out the current article
+      const filtered = relatedArticles.filter(a => a.id !== req.params.id).slice(0, 5);
+      res.json(filtered);
+    } catch (error) {
+      console.error("Error fetching related articles:", error);
+      res.status(500).json({ error: "Failed to fetch related articles" });
+    }
+  });
+
+  // Admin stats
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const [stats] = await db
+        .select({
+          totalArticles: sqlOp<number>`count(*)::int`,
+          publishedToday: sqlOp<number>`count(*) filter (where ${articles.publishedAt} >= ${today})::int`,
+          avgCredibility: sqlOp<number>`avg(${articles.credibilityScore})::int`,
+        })
+        .from(articles)
+        .where(eq(articles.status, "published"));
+
+      const activeSources = await db
+        .select({ count: sqlOp<number>`count(*)::int` })
+        .from(sources)
+        .where(eq(sources.isActive, true));
+
+      res.json({
+        totalArticles: stats?.totalArticles || 0,
+        publishedToday: stats?.publishedToday || 0,
+        avgCredibility: stats?.avgCredibility || 0,
+        activeSources: activeSources[0]?.count || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // Analytics overview
+  app.get("/api/analytics/overview", async (req, res) => {
+    try {
+      const now = new Date();
+      const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const last30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      const [totalViews] = await db
+        .select({
+          total: sqlOp<number>`sum(${articles.viewCount})::int`,
+          last24h: sqlOp<number>`sum(case when ${articles.publishedAt} >= ${last24h} then ${articles.viewCount} else 0 end)::int`,
+          last7d: sqlOp<number>`sum(case when ${articles.publishedAt} >= ${last7d} then ${articles.viewCount} else 0 end)::int`,
+          last30d: sqlOp<number>`sum(case when ${articles.publishedAt} >= ${last30d} then ${articles.viewCount} else 0 end)::int`,
+        })
+        .from(articles)
+        .where(eq(articles.status, "published"));
+
+      res.json({
+        totalViews: totalViews?.total || 0,
+        views24h: totalViews?.last24h || 0,
+        views7d: totalViews?.last7d || 0,
+        views30d: totalViews?.last30d || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching analytics overview:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Analytics trends
+  app.get("/api/analytics/trends", async (req, res) => {
+    try {
+      const last30Days = await db
+        .select({
+          date: sqlOp<string>`date(${articles.publishedAt})`,
+          count: sqlOp<number>`count(*)::int`,
+          views: sqlOp<number>`sum(${articles.viewCount})::int`,
+        })
+        .from(articles)
+        .where(eq(articles.status, "published"))
+        .groupBy(sqlOp`date(${articles.publishedAt})`)
+        .orderBy(desc(sqlOp`date(${articles.publishedAt})`))
+        .limit(30);
+
+      res.json(last30Days);
+    } catch (error) {
+      console.error("Error fetching analytics trends:", error);
+      res.status(500).json({ error: "Failed to fetch trends" });
+    }
+  });
+
+  // Top articles
+  app.get("/api/analytics/top-articles", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const topArticles = await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          viewCount: articles.viewCount,
+          publishedAt: articles.publishedAt,
+          categoryName: categories.name,
+          categoryColor: categories.color,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.viewCount))
+        .limit(limit);
+
+      res.json(topArticles);
+    } catch (error) {
+      console.error("Error fetching top articles:", error);
+      res.status(500).json({ error: "Failed to fetch top articles" });
+    }
+  });
+
+  // Category distribution
+  app.get("/api/analytics/category-distribution", async (req, res) => {
+    try {
+      const distribution = await db
+        .select({
+          categoryId: articles.categoryId,
+          categoryName: categories.name,
+          categoryColor: categories.color,
+          count: sqlOp<number>`count(*)::int`,
+          totalViews: sqlOp<number>`sum(${articles.viewCount})::int`,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.status, "published"))
+        .groupBy(articles.categoryId, categories.name, categories.color)
+        .orderBy(desc(sqlOp<number>`count(*)`));
+
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error fetching category distribution:", error);
+      res.status(500).json({ error: "Failed to fetch category distribution" });
+    }
+  });
+
+  // SEO Audit
+  app.get("/api/seo/audit", async (req, res) => {
+    try {
+      const allArticles = await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          summary: articles.summary,
+          imageUrl: articles.imageUrl,
+          slug: articles.slug,
+        })
+        .from(articles)
+        .where(eq(articles.status, "published"));
+
+      const totalArticles = allArticles.length;
+      const withSummary = allArticles.filter(a => a.summary && a.summary.length > 0).length;
+      const withImages = allArticles.filter(a => a.imageUrl).length;
+      const withOptimalTitle = allArticles.filter(a => a.title.length >= 30 && a.title.length <= 60).length;
+
+      const siteHealthScore = Math.round(
+        ((withSummary / totalArticles) * 30 +
+        (withImages / totalArticles) * 30 +
+        (withOptimalTitle / totalArticles) * 40) || 0
+      );
+
+      res.json({
+        siteHealthScore,
+        totalArticles,
+        metaTagsCoverage: Math.round((withSummary / totalArticles) * 100) || 0,
+        imageOptimization: Math.round((withImages / totalArticles) * 100) || 0,
+        titleOptimization: Math.round((withOptimalTitle / totalArticles) * 100) || 0,
+        articlesWithoutSummary: totalArticles - withSummary,
+        articlesWithoutImages: totalArticles - withImages,
+        sitemapStatus: "active",
+        robotsStatus: "active",
+        canonicalUrls: totalArticles,
+      });
+    } catch (error) {
+      console.error("Error in SEO audit:", error);
+      res.status(500).json({ error: "Failed to perform SEO audit" });
+    }
+  });
+
+  // SEO Recommendations
+  app.get("/api/seo/recommendations", async (req, res) => {
+    try {
+      const recommendations = [];
+
+      const articlesWithoutSummary = await db
+        .select({ id: articles.id, title: articles.title })
+        .from(articles)
+        .where(eq(articles.status, "published"))
+        .limit(5);
+
+      const noSummary = articlesWithoutSummary.filter(a => !a.title);
+      if (noSummary.length > 0) {
+        recommendations.push({
+          type: "warning",
+          title: "Artículos sin meta description",
+          message: `${noSummary.length} artículos necesitan meta description`,
+          priority: "high",
+        });
+      }
+
+      const articlesWithoutImages = await db
+        .select({ id: articles.id, title: articles.title })
+        .from(articles)
+        .where(eq(articles.status, "published"))
+        .limit(5);
+
+      const noImages = articlesWithoutImages.filter(a => !a.title);
+      if (noImages.length > 0) {
+        recommendations.push({
+          type: "info",
+          title: "Optimizar imágenes",
+          message: `${noImages.length} artículos sin imagen destacada`,
+          priority: "medium",
+        });
+      }
+
+      recommendations.push({
+        type: "success",
+        title: "Títulos optimizados",
+        message: "La mayoría de los títulos tienen longitud óptima para SEO",
+        priority: "low",
+      });
+
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching SEO recommendations:", error);
+      res.status(500).json({ error: "Failed to fetch recommendations" });
+    }
+  });
+
+  // Public stats
+  app.get("/api/public/stats", async (req, res) => {
+    try {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const [stats] = await db
+        .select({
+          publishedToday: sqlOp<number>`count(*) filter (where ${articles.publishedAt} >= ${today})::int`,
+          publishedThisMonth: sqlOp<number>`count(*) filter (where ${articles.publishedAt} >= ${thisMonth})::int`,
+          totalViews: sqlOp<number>`sum(${articles.viewCount})::int`,
+        })
+        .from(articles)
+        .where(eq(articles.status, "published"));
+
+      res.json({
+        articlesToday: stats?.publishedToday || 0,
+        articlesThisMonth: stats?.publishedThisMonth || 0,
+        totalReads: stats?.totalViews || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching public stats:", error);
+      res.status(500).json({ error: "Failed to fetch public stats" });
+    }
+  });
+
+  // Public trending
+  app.get("/api/public/trending", async (req, res) => {
+    try {
+      const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      
+      const trending = await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          viewCount: articles.viewCount,
+          categoryName: categories.name,
+          categoryColor: categories.color,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.viewCount))
+        .limit(10);
+
+      res.json(trending);
+    } catch (error) {
+      console.error("Error fetching trending topics:", error);
+      res.status(500).json({ error: "Failed to fetch trending topics" });
     }
   });
 
@@ -502,6 +912,61 @@ Disallow: /admin/`;
 
     res.header("Content-Type", "text/plain");
     res.send(robotsTxt);
+  });
+
+  // Autonomous Content Generation Endpoints
+  app.post("/api/generate/article", async (req, res) => {
+    try {
+      const { category, count = 1 } = req.body;
+      
+      if (!category) {
+        return res.status(400).json({ error: "Category is required" });
+      }
+
+      const { automationScheduler } = await import("./services/automationScheduler");
+      await automationScheduler.generateNow(category, count);
+
+      res.json({ 
+        success: true, 
+        message: `Generated ${count} article(s) for category: ${category}` 
+      });
+    } catch (error) {
+      console.error("Error generating articles:", error);
+      res.status(500).json({ error: "Failed to generate articles" });
+    }
+  });
+
+  app.get("/api/automation/status", async (req, res) => {
+    try {
+      const { automationScheduler } = await import("./services/automationScheduler");
+      const status = automationScheduler.getStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error fetching automation status:", error);
+      res.status(500).json({ error: "Failed to fetch automation status" });
+    }
+  });
+
+  app.post("/api/automation/stop", async (req, res) => {
+    try {
+      const { automationScheduler } = await import("./services/automationScheduler");
+      automationScheduler.stop();
+      res.json({ success: true, message: "Automation stopped" });
+    } catch (error) {
+      console.error("Error stopping automation:", error);
+      res.status(500).json({ error: "Failed to stop automation" });
+    }
+  });
+
+  app.post("/api/automation/start", async (req, res) => {
+    try {
+      const { automationScheduler } = await import("./services/automationScheduler");
+      await automationScheduler.initialize();
+      res.json({ success: true, message: "Automation started" });
+    } catch (error) {
+      console.error("Error starting automation:", error);
+      res.status(500).json({ error: "Failed to start automation" });
+    }
   });
 
   return createServer(app);

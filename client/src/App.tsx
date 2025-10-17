@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { HelmetProvider } from "react-helmet-async";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import Home from "@/pages/Home";
 import CategoryPage from "@/pages/CategoryPage";
 import ArticlePage from "@/pages/ArticlePage";
@@ -62,19 +63,21 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 function Router() {
   return (
     <Switch>
+      {/* Default language (Spanish) routes - no prefix */}
       <Route path="/" component={Home} />
-      
-      {/* Category Page */}
       <Route path="/categoria/:slug" component={CategoryPage} />
-      
-      {/* Article Page */}
       <Route path="/articulo/:slug" component={ArticlePage} />
-      
-      {/* About & Contact Pages */}
       <Route path="/nosotros" component={AboutPage} />
       <Route path="/contacto" component={ContactPage} />
       
-      {/* Admin Routes */}
+      {/* Localized routes with language prefix */}
+      <Route path="/:locale/" component={Home} />
+      <Route path="/:locale/categoria/:slug" component={CategoryPage} />
+      <Route path="/:locale/articulo/:slug" component={ArticlePage} />
+      <Route path="/:locale/nosotros" component={AboutPage} />
+      <Route path="/:locale/contacto" component={ContactPage} />
+      
+      {/* Admin Routes (no localization) */}
       <Route path="/admin">
         <AdminLayout>
           <AdminDashboard />
@@ -132,10 +135,12 @@ function App() {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <LocaleProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </LocaleProvider>
       </QueryClientProvider>
     </HelmetProvider>
   );

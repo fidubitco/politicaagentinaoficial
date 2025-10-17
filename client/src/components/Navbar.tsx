@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import type { Category } from "@shared/schema";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { t, getLocalePath } = useTranslation();
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
@@ -77,15 +80,16 @@ export default function Navbar() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Buscar..."
+                placeholder={t('nav.search')}
                 className="pl-10 w-56 border-border"
                 data-testid="input-search"
               />
             </div>
+            <LanguageSelector />
             <Button variant="outline" size="sm" className="gap-2" data-testid="button-admin" asChild>
               <Link href="/admin">
                 <Settings className="h-4 w-4" />
-                Admin
+                {t('nav.admin')}
               </Link>
             </Button>
           </div>
@@ -157,9 +161,12 @@ export default function Navbar() {
             >
               <Link href="/admin">
                 <Settings className="h-4 w-4" />
-                Admin
+                {t('nav.admin')}
               </Link>
             </Button>
+            <div className="mt-4 border-t pt-4">
+              <LanguageSelector />
+            </div>
           </div>
         </div>
       )}
