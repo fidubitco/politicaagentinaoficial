@@ -1,6 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY environment variable is required for article generation");
+}
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 interface GeneratedArticle {
   title: string;
@@ -69,6 +73,7 @@ Responde SOLO con JSON en este formato exacto:
     });
 
     const rawJson = response.text;
+    
     if (!rawJson) {
       throw new Error("Respuesta vacía del modelo");
     }

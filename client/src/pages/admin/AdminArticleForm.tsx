@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Sparkles } from "lucide-react";
@@ -197,13 +198,13 @@ export default function AdminArticleForm() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Generar Artículo de Nivel Mundial</DialogTitle>
+                  <DialogDescription>
+                    Utiliza inteligencia artificial de Google Gemini para crear contenido editorial profesional de alta calidad.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Utiliza inteligencia artificial de Google Gemini para crear contenido editorial profesional de alta calidad.
-                  </p>
                   <div>
-                    <FormLabel>Tema del artículo (opcional)</FormLabel>
+                    <Label>Tema del artículo (opcional)</Label>
                     <Input
                       value={autoGenTopic}
                       onChange={(e) => setAutoGenTopic(e.target.value)}
