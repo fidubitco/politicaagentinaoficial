@@ -9,6 +9,7 @@ import { Link } from "wouter";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { SEOHead } from "@/components/SEOHead";
+import { LazyImage } from "@/components/LazyImage";
 
 export default function ArticlePage() {
   const [, params] = useRoute("/articulo/:slug");
@@ -163,11 +164,14 @@ export default function ArticlePage() {
 
           {/* Featured Image */}
           {article.imageUrl && (
-            <div className="mb-8 rounded-lg overflow-hidden">
-              <img
+            <div className="mb-8 rounded-xl overflow-hidden shadow-2xl">
+              <LazyImage
                 src={article.imageUrl}
                 alt={article.title}
-                className="w-full h-auto object-cover"
+                aspectRatio="aspect-[16/9]"
+                enableZoom={false}
+                photographer={(article.metadata as any)?.photographer}
+                photographerUrl={(article.metadata as any)?.photographerUrl}
                 data-testid="article-image"
               />
             </div>

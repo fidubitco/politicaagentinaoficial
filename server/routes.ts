@@ -13,6 +13,7 @@ import { eq, desc, sql as sqlOp } from "drizzle-orm";
 import { z } from "zod";
 import { generatePodcastStyleAudio } from "./lib/elevenlabs-service";
 import { generateDiverseArticles } from "./lib/massive-article-generator";
+import { imageSearchService } from "./services/imageSearch";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
@@ -322,6 +323,76 @@ export function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error generating bulk articles:", error);
       res.status(500).json({ error: "Failed to generate articles" });
+    }
+  });
+
+  // Image search endpoint
+  app.post("/api/images/search", async (req, res) => {
+    try {
+      const { title, category, orientation = 'landscape' } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ 
+          error: "Title is required",
+          url: imageSearchService.getFallbackImage(category),
+          alt: title || 'Imagen de artículo',
+          isFallback: true,
+          fallbackReason: 'missing_title'
+        });
+      }
+
+      // Check if PEXELS_API_KEY is available
+      if (!process.env.PEXELS_API_KEY) {
+        console.warn('⚠️ PEXELS_API_KEY not configured, using fallback image');
+        return res.json({ 
+          url: imageSearchService.getFallbackImage(category),
+          alt: title,
+          photographer: null,
+          photographerUrl: null,
+          isFallback: true,
+          fallbackReason: 'missing_api_key'
+        });
+      }
+
+      const image = await imageSearchService.searchContextualImage(
+        title,
+        category,
+        undefined,
+        orientation as 'landscape' | 'portrait' | 'square'
+      );
+
+      if (!image) {
+        console.log(`ℹ️ No contextual image found for "${title}", using fallback`);
+        return res.json({ 
+          url: imageSearchService.getFallbackImage(category),
+          alt: title,
+          photographer: null,
+          photographerUrl: null,
+          isFallback: true,
+          fallbackReason: 'no_results'
+        });
+      }
+
+      res.json({
+        ...image,
+        isFallback: false
+      });
+    } catch (error) {
+      console.error("❌ Error searching image:", error);
+      
+      // Return fallback image even on error with detailed logging
+      const fallbackUrl = imageSearchService.getFallbackImage(req.body.category);
+      console.log(`🔄 Returning fallback image due to error: ${fallbackUrl}`);
+      
+      res.json({ 
+        url: fallbackUrl,
+        alt: req.body.title || 'Imagen de artículo',
+        photographer: null,
+        photographerUrl: null,
+        isFallback: true,
+        fallbackReason: 'search_error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

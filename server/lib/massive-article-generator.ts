@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import type { InsertArticle } from "@shared/schema";
+import { imageSearchService } from "../services/imageSearch";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -130,9 +131,9 @@ export async function generateDiverseArticles(config: ArticleGenerationConfig): 
     const article = await generateSingleArticle(idea, config.categoryId, config.sourceId, config.categoryName);
     articles.push(article);
     
-    // Rate limit: 1 second between requests
+    // Small delay between articles to avoid rate limiting
     if (i < config.count - 1) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
@@ -192,6 +193,23 @@ Responde SOLO con JSON válido:
 
     const data = JSON.parse(jsonText.trim());
 
+    // Search for hyperrealistic contextual image using Pexels
+    console.log(`🔍 Buscando imagen hiperrealista para: "${data.title}"`);
+    const contextualImage = await imageSearchService.searchContextualImage(
+      data.title,
+      categoryName,
+      undefined,
+      'landscape'
+    );
+
+    const imageUrl = contextualImage?.url || imageSearchService.getFallbackImage(categoryName);
+    
+    if (contextualImage) {
+      console.log(`✅ Imagen contextual encontrada: ${contextualImage.alt}`);
+    } else {
+      console.log(`⚠️ Usando imagen fallback para categoría: ${categoryName}`);
+    }
+
     return {
       title: data.title,
       slug: `${data.slug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -204,7 +222,11 @@ Responde SOLO con JSON válido:
       publishedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // Random date within last week
       viewCount: Math.floor(Math.random() * 8000) + 500,
       credibilityScore: Math.floor(Math.random() * 15) + 85, // 85-100
-      imageUrl: getRandomImageForCategory(categoryName),
+      imageUrl,
+      metadata: contextualImage ? {
+        photographer: contextualImage.photographer,
+        photographerUrl: contextualImage.photographerUrl
+      } : null,
     };
   } catch (error) {
     console.error("Error generating article:", error);

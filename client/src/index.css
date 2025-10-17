@@ -346,3 +346,132 @@
     inset: -1px;
   }
 }
+
+/* Professional Micro-Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Image loading optimization */
+img {
+  content-visibility: auto;
+}
+
+/* Card hover effects */
+.hover-elevate {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.hover-elevate:hover {
+  transform: translateY(-2px);
+}
+
+/* Professional fade-in for page content */
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Staggered animation for lists */
+.animate-slide-in {
+  animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Loading shimmer effect */
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.8) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Button press feedback */
+.active-elevate-2:active {
+  transform: scale(0.98);
+}
+
+/* Smooth color transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Focus visible improvements */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Typography improvements */
+.font-serif {
+  font-feature-settings: 'liga' 1, 'calt' 1, 'kern' 1;
+  letter-spacing: -0.015em;
+}
+
+/* Responsive image containers */
+.aspect-video,
+.aspect-square,
+.aspect-\[16\/9\],
+.aspect-\[21\/9\],
+.aspect-\[4\/3\] {
+  position: relative;
+  overflow: hidden;
+}
+
+.aspect-video img,
+.aspect-square img,
+.aspect-\[16\/9\] img,
+.aspect-\[21\/9\] img,
+.aspect-\[4\/3\] img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
