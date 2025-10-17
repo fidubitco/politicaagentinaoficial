@@ -53,6 +53,22 @@ export default function Navbar() {
                 <Link href={`/categoria/${cat.slug}`}>{cat.name}</Link>
               </Button>
             ))}
+            <Button
+              variant="ghost"
+              className="text-sm font-medium hover-elevate"
+              data-testid="nav-about"
+              asChild
+            >
+              <Link href="/nosotros">Nosotros</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-sm font-medium hover-elevate"
+              data-testid="nav-contact"
+              asChild
+            >
+              <Link href="/contacto">Contacto</Link>
+            </Button>
           </div>
 
           {/* Search Bar - Professional */}
@@ -117,6 +133,22 @@ export default function Navbar() {
                 <Link href={`/categoria/${cat.slug}`}>{cat.name}</Link>
               </Button>
             ))}
+            <Button
+              variant="ghost"
+              className="w-full justify-start hover-elevate"
+              data-testid="mobile-nav-about"
+              asChild
+            >
+              <Link href="/nosotros">Nosotros</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start hover-elevate"
+              data-testid="mobile-nav-contact"
+              asChild
+            >
+              <Link href="/contacto">Contacto</Link>
+            </Button>
             <Button
               variant="outline"
               className="w-full justify-start gap-2 mt-4"

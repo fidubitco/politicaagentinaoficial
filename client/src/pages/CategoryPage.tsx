@@ -2,6 +2,7 @@ import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SEOHead } from "@/components/SEOHead";
 import LiveMetricsTicker from "@/components/LiveMetricsTicker";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -86,10 +87,53 @@ export default function CategoryPage() {
     );
   }
 
+  const siteUrl = import.meta.env.VITE_SITE_URL || "https://politica-argentina.replit.app";
+  const categoryUrl = `${siteUrl}/categoria/${category.slug}`;
+
+  const collectionPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": category.name,
+    "description": category.description || `Últimas noticias de ${category.name}`,
+    "url": categoryUrl,
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "POLÍTICA ARGENTINA",
+      "url": siteUrl
+    }
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Inicio",
+        "item": siteUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": category.name,
+        "item": categoryUrl
+      }
+    ]
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <LiveMetricsTicker metrics={liveMetrics} />
+    <>
+      <SEOHead
+        title={`${category.name} - Noticias y Análisis`}
+        description={category.description || `Últimas noticias de ${category.name}. Cobertura completa, análisis experto y actualizaciones en tiempo real sobre ${category.name.toLowerCase()} en Argentina.`}
+        keywords={[category.name, 'noticias', 'argentina', 'política', 'análisis']}
+        canonical={categoryUrl}
+      />
+
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <LiveMetricsTicker metrics={liveMetrics} />
 
       {/* Category Header */}
       <section className="py-12 border-b" style={{ 
@@ -172,6 +216,7 @@ export default function CategoryPage() {
       </section>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }

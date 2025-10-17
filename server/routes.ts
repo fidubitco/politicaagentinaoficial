@@ -404,5 +404,105 @@ export function registerRoutes(app: Express) {
     res.status(401).json({ error: "Not authenticated" });
   });
 
+  // SEO: Sitemap XML
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const siteUrl = process.env.SITE_URL || "https://politica-argentina.replit.app";
+      
+      // Get all published articles and categories
+      const [allArticles, allCategories] = await Promise.all([
+        db.select({
+          slug: articles.slug,
+          updatedAt: articles.updatedAt,
+        })
+        .from(articles)
+        .where(eq(articles.status, "published"))
+        .orderBy(desc(articles.publishedAt)),
+        
+        db.select({
+          slug: categories.slug,
+        })
+        .from(categories)
+      ]);
+
+      // Build sitemap XML
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
+  <url>
+    <loc>${siteUrl}</loc>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- About Page -->
+  <url>
+    <loc>${siteUrl}/nosotros</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Contact Page -->
+  <url>
+    <loc>${siteUrl}/contacto</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Category Pages -->
+  ${allCategories.map(cat => `
+  <url>
+    <loc>${siteUrl}/categoria/${cat.slug}</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`).join('')}
+  
+  <!-- Article Pages -->
+  ${allArticles.map(article => `
+  <url>
+    <loc>${siteUrl}/articulo/${article.slug}</loc>
+    <lastmod>${article.updatedAt ? new Date(article.updatedAt).toISOString() : new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`).join('')}
+</urlset>`;
+
+      res.header("Content-Type", "application/xml");
+      res.send(sitemap);
+    } catch (error) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  // SEO: Robots.txt
+  app.get("/robots.txt", (req, res) => {
+    const siteUrl = process.env.SITE_URL || "https://politica-argentina.replit.app";
+    
+    const robotsTxt = `# Robots.txt for POLÍTICA ARGENTINA
+# Permitir acceso a todos los crawlers
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: ${siteUrl}/sitemap.xml
+
+# Crawl-delay optimizado
+Crawl-delay: 1
+
+# Páginas específicas
+Allow: /nosotros
+Allow: /contacto
+Allow: /categoria/
+Allow: /articulo/
+
+# Bloquear admin
+Disallow: /admin/`;
+
+    res.header("Content-Type", "text/plain");
+    res.send(robotsTxt);
+  });
+
   return createServer(app);
 }

@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SEOHead } from "@/components/SEOHead";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import type { Article, Category } from "@shared/schema";
@@ -21,6 +22,39 @@ interface DolarData {
 }
 
 export default function Home() {
+  const siteUrl = import.meta.env.VITE_SITE_URL || "https://politica-argentina.replit.app";
+  
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "POLÍTICA ARGENTINA",
+    "url": siteUrl,
+    "description": "Portal líder de noticias políticas de Argentina. Cobertura 24/7, análisis experto, datos en tiempo real.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${siteUrl}/buscar?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsMediaOrganization",
+    "name": "POLÍTICA ARGENTINA",
+    "url": siteUrl,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteUrl}/logo.png`
+    },
+    "description": "Portal líder de noticias políticas de Argentina",
+    "sameAs": [
+      "https://twitter.com/PoliticaArg",
+      "https://facebook.com/PoliticaArgentina"
+    ]
+  };
   const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ['/api/articles'],
     staleTime: 30000,
@@ -75,8 +109,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <>
+      <SEOHead
+        title="POLÍTICA ARGENTINA - Noticias Políticas en Tiempo Real"
+        description="Portal líder de noticias políticas de Argentina. Cobertura 24/7, análisis experto, datos en tiempo real y las últimas noticias del panorama político argentino."
+        keywords={['política argentina', 'noticias', 'actualidad', 'análisis político', 'argentina', 'noticias en vivo']}
+        canonical={siteUrl}
+      />
+
+      <div className="min-h-screen bg-background">
+        <Navbar />
       
       {/* Live Breaking News Ticker */}
       {dolarData && (
@@ -295,6 +337,7 @@ export default function Home() {
       </main>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }

@@ -11,6 +11,9 @@ import { Link, useLocation } from "wouter";
 import { HelmetProvider } from "react-helmet-async";
 import Home from "@/pages/Home";
 import CategoryPage from "@/pages/CategoryPage";
+import ArticlePage from "@/pages/ArticlePage";
+import AboutPage from "@/pages/AboutPage";
+import ContactPage from "@/pages/ContactPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminArticles from "@/pages/admin/AdminArticles";
 import AdminArticleForm from "@/pages/admin/AdminArticleForm";
@@ -18,7 +21,6 @@ import AdminSources from "@/pages/admin/AdminSources";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import AdminGenerator from "@/pages/admin/AdminGenerator";
 import AdminBulkGenerator from "@/pages/admin/AdminBulkGenerator";
-import ArticlePage from "@/pages/ArticlePage";
 import NotFound from "@/pages/not-found";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -67,6 +69,10 @@ function Router() {
       
       {/* Article Page */}
       <Route path="/articulo/:slug" component={ArticlePage} />
+      
+      {/* About & Contact Pages */}
+      <Route path="/nosotros" component={AboutPage} />
+      <Route path="/contacto" component={ContactPage} />
       
       {/* Admin Routes */}
       <Route path="/admin">
