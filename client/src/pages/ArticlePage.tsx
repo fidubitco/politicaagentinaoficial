@@ -14,7 +14,7 @@ export default function ArticlePage() {
   const [, params] = useRoute("/articulo/:slug");
   const slug = params?.slug;
 
-  const { data: article, isLoading, error } = useQuery<Article>({
+  const { data: article, isLoading, error } = useQuery<Article & { categoryName?: string }>({
     queryKey: [`/api/articles/${slug}`],
     enabled: !!slug,
   });

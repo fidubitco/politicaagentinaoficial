@@ -1,14 +1,18 @@
 import type { Express } from "express";
 import { storage } from "./storage";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon, neonConfig } from "@neondatabase/serverless";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const db = drizzle(pool);
+// Configure Neon to use HTTP instead of WebSocket
+neonConfig.fetchConnectionCache = true;
+
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle(sql);
 import { articles, categories, sources, insertArticleSchema, insertCategorySchema, insertSourceSchema } from "@shared/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql as sqlOp } from "drizzle-orm";
 import { z } from "zod";
 import { generatePodcastStyleAudio } from "./lib/elevenlabs-service";
+import { generateDiverseArticles } from "./lib/massive-article-generator";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
@@ -87,7 +91,7 @@ export function registerRoutes(app: Express) {
       // Increment view count
       await db
         .update(articles)
-        .set({ viewCount: sql`${articles.viewCount} + 1` })
+        .set({ viewCount: sqlOp`${articles.viewCount} + 1` })
         .where(eq(articles.id, article.id));
 
       res.json(article);
@@ -278,6 +282,46 @@ export function registerRoutes(app: Express) {
         return res.status(400).json({ error: "Validation error", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create source" });
+    }
+  });
+
+  // Massive article generation
+  app.post("/api/admin/generate-bulk-articles", async (req, res) => {
+    try {
+      const { categoryId, categoryName, count } = req.body;
+      
+      if (!categoryId || !categoryName || !count) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Get default source
+      const [source] = await db.select().from(sources).where(eq(sources.name, 'POLÍTICA ARGENTINA')).limit(1);
+      const sourceId = source?.id || (await db.insert(sources).values({
+        name: 'POLÍTICA ARGENTINA',
+        url: 'https://politica-argentina.replit.app',
+        credibilityScore: 95,
+        isActive: true,
+      }).returning())[0].id;
+
+      // Generate articles
+      const generatedArticles = await generateDiverseArticles({
+        categoryId,
+        categoryName,
+        sourceId,
+        count: parseInt(count),
+      });
+
+      // Insert articles
+      const inserted = [];
+      for (const article of generatedArticles) {
+        const [newArticle] = await db.insert(articles).values(article).returning();
+        inserted.push(newArticle);
+      }
+
+      res.json({ success: true, count: inserted.length, articles: inserted });
+    } catch (error) {
+      console.error("Error generating bulk articles:", error);
+      res.status(500).json({ error: "Failed to generate articles" });
     }
   });
 
