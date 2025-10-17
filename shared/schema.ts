@@ -40,6 +40,10 @@ export const categories = pgTable("categories", {
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
+  color: text("color").default("#6CACE4"),
+  icon: text("icon").default("Folder"),
+  priority: integer("priority").default(0),
+  isFeatured: boolean("is_featured").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

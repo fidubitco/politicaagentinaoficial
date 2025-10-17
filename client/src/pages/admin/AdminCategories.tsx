@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Pencil, Trash2, FolderTree } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Pencil, Trash2, FolderTree, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,6 +58,19 @@ export default function AdminCategories() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
       toast({ title: "Categoría eliminada" });
+    },
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', '/api/admin/seed-categories', {}) as { created: number; skipped: number; total: number; success: boolean };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      toast({
+        title: "Categorías inicializadas",
+        description: `Se crearon ${data.created} categorías, ${data.skipped} ya existían`,
+      });
     },
   });
 
@@ -122,13 +136,23 @@ export default function AdminCategories() {
           <p className="text-muted-foreground">Organiza tus artículos por categorías</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm} data-testid="button-new-category">
-              <Plus className="h-4 w-4 mr-2" />
-              Nueva Categoría
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => seedMutation.mutate()}
+            disabled={seedMutation.isPending}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Inicializar Categorías
+          </Button>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm} data-testid="button-new-category">
+                <Plus className="h-4 w-4 mr-2" />
+                Nueva Categoría
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editingCategory ? 'Editar' : 'Nueva'} Categoría</DialogTitle>
@@ -178,6 +202,7 @@ export default function AdminCategories() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>
@@ -191,11 +216,15 @@ export default function AdminCategories() {
                 <div
                   key={category.id}
                   className="p-4 border rounded-lg hover-elevate"
+                  style={{ borderLeftColor: category.color || '#6CACE4', borderLeftWidth: '4px' }}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <FolderTree className="h-5 w-5 text-primary" />
+                      <FolderTree className="h-5 w-5" style={{ color: category.color || '#6CACE4' }} />
                       <h3 className="font-semibold">{category.name}</h3>
+                      {category.isFeatured && (
+                        <Badge variant="secondary" className="text-xs">Destacada</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       <Button

@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { scrapeAllSources } from "./lib/scraper";
 import { generateArticles } from "./lib/article-generator";
+import { defaultCategories } from "./lib/category-seed";
 import { insertArticleSchema, insertSourceSchema, insertCategorySchema } from "@shared/schema";
 
 function generateSlug(title: string): string {
@@ -255,18 +256,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seed default categories
+  app.post("/api/admin/seed-categories", async (req, res) => {
+    try {
+      const createdCategories = [];
+      const skippedCategories = [];
+
+      for (const categoryData of defaultCategories) {
+        try {
+          const existing = await storage.getCategoryBySlug(categoryData.slug);
+          if (existing) {
+            skippedCategories.push(existing);
+            console.log(`Category already exists: ${categoryData.slug}`);
+            continue;
+          }
+
+          const category = await storage.createCategory(categoryData as any);
+          createdCategories.push(category);
+        } catch (error) {
+          console.error(`Error creating category "${categoryData.name}":`, error);
+        }
+      }
+
+      res.json({
+        success: true,
+        created: createdCategories.length,
+        skipped: skippedCategories.length,
+        total: defaultCategories.length,
+        categories: createdCategories,
+      });
+    } catch (error) {
+      console.error("Error seeding categories:", error);
+      res.status(500).json({ error: "Failed to seed categories" });
+    }
+  });
+
   // Generate articles from templates
   app.post("/api/admin/generate-articles", async (req, res) => {
     try {
-      const { count = 30 } = req.body;
+      const { count = 30, categorySlug = "justicia" } = req.body;
       
       // Create or get category
-      let category = await storage.getCategoryBySlug("escandalo-judicial");
+      let category = await storage.getCategoryBySlug(categorySlug);
       if (!category) {
         category = await storage.createCategory({
-          name: "Escándalo Judicial",
-          slug: "escandalo-judicial",
-          description: "Noticias sobre casos judiciales de alto impacto y corrupción",
+          name: "Justicia",
+          slug: "justicia",
+          description: "Poder Judicial, Corte Suprema, causas judiciales y fallos",
+          color: "#8B4513",
+          icon: "Scale",
+          priority: 85,
+          isFeatured: true,
         });
       }
 
