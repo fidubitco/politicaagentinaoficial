@@ -1,0 +1,31 @@
+# Server files - Backend va en Railway
+server/
+dist/
+db/
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+
+# Build artifacts
+*.tar.gz
+
+# Temp files
+.local/
+.cache/
+.tmp/
+
+# Development
+.replit
+.breakpoints

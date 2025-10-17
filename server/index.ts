@@ -1,11 +1,28 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { automationScheduler } from "./services/automationScheduler";
 
 const app = express();
+
+// CORS configuration for Vercel frontend
+const corsOptions = {
+  origin: [
+    'https://politicaargentinaoficial.vercel.app',
+    'https://politicaargentinaoficial-ctow581as.vercel.app',
+    /https:\/\/politicaargentinaoficial-.*\.vercel\.app$/, // Match preview deployments
+    'http://localhost:5173', // Local development
+    'http://localhost:5000', // Local development
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
