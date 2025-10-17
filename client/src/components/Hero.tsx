@@ -1,77 +1,95 @@
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Brain, Globe } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Quantum-inspired background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-chart-3/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
-        <div className="absolute top-20 left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-chart-3/20 rounded-full blur-3xl animate-pulse delay-700" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-sm font-medium text-primary">Análisis en Tiempo Real</span>
-        </div>
-
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6">
-          <span className="bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
-            Análisis Político
-          </span>
-          <br />
-          <span className="bg-gradient-to-r from-accent via-chart-3 to-primary bg-clip-text text-transparent">
-            Cuántico con IA
-          </span>
-        </h1>
-
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
-          Predicciones electorales con inteligencia artificial, visualización 3D de datos,
-          y análisis predictivo en tiempo real. El futuro del periodismo político.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button
-            size="lg"
-            className="min-w-[200px] text-base font-semibold hover-elevate active-elevate-2"
-            data-testid="button-explore-predictions"
-          >
-            <Brain className="mr-2 h-5 w-5" />
-            Explorar Predicciones
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="min-w-[200px] text-base font-semibold hover-elevate active-elevate-2"
-            data-testid="button-view-dashboard"
-          >
-            <Globe className="mr-2 h-5 w-5" />
-            Ver Dashboard
-          </Button>
-        </div>
-
-        {/* Live metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto">
-          {[
-            { icon: TrendingUp, label: "Predicción Electoral", value: "94% Precisión" },
-            { icon: Brain, label: "Análisis IA", value: "5000+ Keywords" },
-            { icon: Globe, label: "Cobertura Provincial", value: "24 Provincias" }
-          ].map((metric, idx) => (
-            <div
-              key={idx}
-              className="p-6 rounded-lg bg-card/50 backdrop-blur-sm border border-card-border hover-elevate"
-              data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}
-            >
-              <metric.icon className="h-8 w-8 text-primary mb-3 mx-auto" />
-              <div className="text-2xl font-bold text-foreground mb-1">{metric.value}</div>
-              <div className="text-sm text-muted-foreground">{metric.label}</div>
+    <section className="bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Lead Story Package - Editorial Style */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Featured Story - Large */}
+          <div className="lg:col-span-2">
+            <div className="group cursor-pointer">
+              <div className="relative aspect-[16/9] overflow-hidden rounded-sm mb-4">
+                <img 
+                  src="https://images.unsplash.com/photo-1541872703-74c34d9d3abd?w=1200&q=80"
+                  alt="Featured story"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-4 left-4">
+                  <span className="inline-block px-3 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-sm">
+                    ANÁLISIS EXCLUSIVO
+                  </span>
+                </div>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 leading-tight group-hover:text-primary transition-colors" data-testid="text-hero-headline">
+                Predicciones IA para Elecciones 2025: Tres Escenarios Clave
+              </h2>
+              <p className="text-lg text-muted-foreground mb-4 leading-relaxed" data-testid="text-hero-excerpt">
+                Nuestro modelo de inteligencia artificial analiza 5000+ variables políticas 
+                para proyectar los escenarios más probables en las próximas elecciones presidenciales. 
+                Análisis provincial completo y predicción de resultados por distrito.
+              </p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Equipo IA Política</span>
+                <span>•</span>
+                <span>16 Oct 2024</span>
+                <span>•</span>
+                <span>8 min lectura</span>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Secondary Stories - Right Rail */}
+          <div className="lg:col-span-1 space-y-6">
+            {[
+              {
+                title: "Dólar Blue: Proyección IA para Próximos 30 Días",
+                category: "Economía",
+                time: "5 min",
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&q=80"
+              },
+              {
+                title: "Congreso Nacional: Mapeo de Bloques y Alianzas",
+                category: "Política",
+                time: "6 min",
+                image: "https://images.unsplash.com/photo-1555421689-3f034debb7a6?w=400&q=80"
+              },
+              {
+                title: "Provincias Clave: Análisis Electoral Detallado",
+                category: "Provincial",
+                time: "7 min",
+                image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400&q=80"
+              }
+            ].map((story, idx) => (
+              <div key={idx} className="group cursor-pointer flex gap-4" data-testid={`story-secondary-${idx}`}>
+                <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden rounded-sm">
+                  <img 
+                    src={story.image}
+                    alt={story.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wide">{story.category}</span>
+                  <h3 className="font-serif font-semibold text-base leading-tight mt-1 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                    {story.title}
+                  </h3>
+                  <span className="text-xs text-muted-foreground">{story.time}</span>
+                </div>
+              </div>
+            ))}
+            
+            {/* CTA to Dashboard */}
+            <div className="pt-4 border-t border-border">
+              <Button variant="outline" className="w-full justify-between group hover-elevate" data-testid="button-dashboard-cta">
+                Ver Dashboard Completo
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

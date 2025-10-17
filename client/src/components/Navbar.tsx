@@ -8,21 +8,21 @@ export default function Navbar() {
 
   const categories = [
     "Nacional", "Provincial", "Economía", "Internacional", 
-    "Tecnología", "Análisis IA", "Dashboard"
+    "Análisis IA", "Dashboard"
   ];
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/50">
+    <nav className="sticky top-0 z-50 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo - Editorial Style */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-black bg-gradient-to-r from-primary via-accent to-chart-3 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-serif font-bold text-foreground tracking-tight">
               POLÍTICA ARGENTINA
             </h1>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Clean Editorial */}
           <div className="hidden md:flex items-center gap-1">
             {categories.map((cat) => (
               <Button
@@ -36,14 +36,14 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar - Professional */}
           <div className="hidden md:flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Buscar noticias..."
-                className="pl-10 w-64 bg-card/50"
+                placeholder="Buscar..."
+                className="pl-10 w-56 border-border"
                 data-testid="input-search"
               />
             </div>
@@ -57,20 +57,20 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - Editorial Clean */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border/50 bg-card/80 backdrop-blur-xl">
+        <div className="md:hidden border-t border-border bg-background">
           <div className="px-4 py-4 space-y-2">
             <Input
               type="search"
               placeholder="Buscar..."
-              className="w-full mb-4 bg-background/50"
+              className="w-full mb-4"
               data-testid="input-mobile-search"
             />
             {categories.map((cat) => (

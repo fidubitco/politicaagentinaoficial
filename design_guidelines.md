@@ -1,183 +1,201 @@
-# Design Guidelines: POLITICA ARGENTINA - Quantum Political Intelligence Portal
+# Design Guidelines: POLÍTICA ARGENTINA - Premium Editorial Intelligence Portal
 
-## Design Approach: Quantum Visionary Futurism
+## Design Approach: Professional Editorial Excellence
 
-**Selected Approach**: Custom Quantum-Inspired Design System - A revolutionary fusion of cutting-edge web technology and political intelligence, transcending traditional news portals to create an immersive analytical experience.
+**Selected Approach**: Premium Editorial Design System - A sophisticated fusion of world-class journalism design (CNN International, Bloomberg News, The New York Times) with advanced AI-powered political intelligence.
 
-**Design Philosophy**: "Política Cuántica" - Political reality exists in multiple states simultaneously, visualized through quantum-inspired interfaces where data, predictions, and analysis converge in a holographic information space.
+**Design Philosophy**: "Authoritative Intelligence" - Deliver cutting-edge predictive analytics and data-driven insights through a refined, credible editorial presentation that commands trust and professional respect.
 
 ---
 
 ## Color Palette
 
-### Dark Mode Primary (Quantum Night)
-- **Background Base**: 8 8% 4% (Deep space black with subtle blue undertone)
-- **Surface Elevated**: 220 15% 8% (Midnight blue-grey for cards/panels)
-- **Glassmorphism Overlay**: rgba(15, 25, 45, 0.7) with backdrop-blur-xl
+### Light Mode Primary (Editorial White)
+- **Background Base**: 30 15% 97% (Warm off-white, NYT-inspired)
+- **Surface Elevated**: 0 0% 100% (Pure white for cards/panels)
+- **Text Primary**: 220 20% 15% (Rich charcoal for body text)
+- **Text Secondary**: 220 10% 45% (Muted grey for metadata)
 
-### Quantum Accent Colors
-- **Primary Quantum Blue**: 217 91% 60% (Electric azure for primary actions, neural connections)
-- **Secondary Cyan**: 187 85% 55% (Holographic cyan for data streams)
-- **Tertiary Purple**: 270 75% 60% (Quantum entanglement purple for predictions)
-- **Alert Red**: 355 85% 58% (Political urgency indicators)
-- **Success Green**: 142 76% 45% (Positive trends, confirmations)
+### Dark Mode Primary (Professional Night)
+- **Background Base**: 220 25% 8% (Deep navy-charcoal)
+- **Surface Elevated**: 220 20% 12% (Elevated dark panels)
+- **Text Primary**: 0 0% 95% (Crisp white for readability)
+- **Text Secondary**: 220 10% 65% (Muted light grey)
 
-### Data Visualization Spectrum
-- **Neural Network Gradient**: From 217 91% 60% → 187 85% 55% → 270 75% 60%
-- **Heat Map Scale**: 142 76% 45% (low) → 48 96% 58% (mid) → 355 85% 58% (high)
-- **Particle Effects**: Multi-colored with 40% opacity, animated with mouse interaction
+### Editorial Accent Colors
+- **Primary Crimson**: 355 75% 45% (Editorial red for breaking news, primary actions - CNN-inspired)
+- **Secondary Navy**: 220 50% 25% (Deep editorial blue for headers, trust signals)
+- **Data Teal**: 185 65% 42% (Bloomberg-inspired for financial/data visualization)
+- **Alert Orange**: 25 95% 53% (Breaking alerts, urgent indicators)
+- **Success Green**: 145 70% 41% (Positive metrics, confirmations)
+
+### Neutral Grays (Sophisticated Scale)
+- **Border Light**: 220 15% 88% (Subtle dividers in light mode)
+- **Border Dark**: 220 15% 22% (Subtle dividers in dark mode)
+- **Muted Background**: 220 12% 95% (Light mode subtle panels)
+- **Hover Overlay**: rgba(0, 0, 0, 0.04) light / rgba(255, 255, 255, 0.06) dark
 
 ---
 
 ## Typography
 
 ### Font Families
-- **Headlines/UI**: Inter (via Google Fonts) - Clean, modern, excellent for data displays
-- **Body Text**: System font stack optimized for readability
-- **Monospace/Data**: JetBrains Mono for code blocks, technical metrics
+- **Display/Headlines**: Playfair Display (serif) - Authoritative, elegant, NYT-inspired
+- **UI/Navigation**: Inter (sans-serif) - Clean, modern, Bloomberg-inspired
+- **Body Text**: Georgia fallback to Playfair for articles, Inter for UI
+- **Monospace/Data**: JetBrains Mono for financial data, code blocks
 
-### Type Scale
-- **Hero Headlines**: text-6xl md:text-7xl lg:text-8xl font-black tracking-tight
-- **Section Headers**: text-4xl md:text-5xl font-bold tracking-tight
-- **Card Titles**: text-2xl font-semibold
-- **Body Text**: text-base leading-relaxed
-- **Metadata/Captions**: text-sm text-neutral-400
-- **Micro Copy**: text-xs uppercase tracking-wider font-medium
+### Type Scale (Editorial Hierarchy)
+- **Display Headlines**: 48px/52px (3rem), Playfair Display, font-weight: 700
+- **Section Headers**: 32px/40px (2rem), Playfair Display, font-weight: 700
+- **Article Headlines**: 28px/36px (1.75rem), Playfair Display, font-weight: 600
+- **Subheadings**: 20px/28px (1.25rem), Inter, font-weight: 600
+- **Body Serif**: 18px/28px (1.125rem), Playfair Display, font-weight: 400
+- **Body Sans**: 16px/24px (1rem), Inter, font-weight: 400
+- **Meta/Caption**: 14px/20px (0.875rem), Inter, font-weight: 400
+- **Small Print**: 12px/18px (0.75rem), Inter, font-weight: 400
+
+### Typography Rules
+- Article headlines always use Playfair Display serif
+- UI elements, buttons, navigation use Inter sans-serif
+- Generous line-height (1.6-1.8) for body text readability
+- Letter-spacing: -0.02em for large headlines, 0 for body
 
 ---
 
 ## Layout System
 
-### Spacing Primitives
-Primary units: **4, 8, 16, 24, 32, 48** (Tailwind scale)
-- Container padding: px-4 md:px-8 lg:px-16
-- Section spacing: py-16 md:py-24 lg:py-32
-- Card gaps: gap-4 md:gap-6 lg:gap-8
-- Element spacing: space-y-4, space-y-8, space-y-12
+### Grid Architecture (Tri-Column Editorial)
+- **Desktop Layout**: 3-column grid (Lead: 60%, Rail: 40% for homepage)
+- **Article Layout**: Wide column (700px) + narrow info rail (300px)
+- **Section Grids**: Modular 3-column for story index, 2-column for analysis
+- **Mobile**: Single column with collapsible navigation
 
-### Grid Systems
-- **Homepage Hero**: Full viewport with 3D canvas background, centered content max-w-7xl
-- **Dashboard**: 12-column grid with responsive breakpoints
-- **Article Layout**: max-w-4xl centered prose with sidebar widgets
-- **Data Visualizations**: Full-width containers with internal max-w-7xl
+### Spacing Primitives (NYT-inspired Generous Whitespace)
+- **Container padding**: 24px (mobile), 48px (tablet), 64px (desktop)
+- **Section spacing**: 64px (mobile), 96px (tablet), 128px (desktop)
+- **Card gaps**: 24px (mobile), 32px (desktop)
+- **Element spacing**: 16px, 24px, 32px, 48px
+- **Line containers**: max-w-7xl (1280px) centered
+
+### Responsive Breakpoints
+- Mobile: 320px - 767px
+- Tablet: 768px - 1023px
+- Desktop: 1024px - 1439px
+- Large: 1440px+
 
 ---
 
 ## Component Library
 
-### Core Navigation
-- **Quantum Navbar**: Glassmorphism header with backdrop-blur-xl, sticky top-0, contains logo, 5D navigation menu, search bar with voice input, user profile
-- **Mega Menu**: Dropdown with 18 content silos displayed in 3-column grid, each with icon + title + description
+### Editorial Navigation
+- **Sticky Header**: Clean white/dark background, minimal borders, sticky on scroll
+- **Primary Nav**: Horizontal menu with serif category labels, hover underline
+- **Breaking News Ticker**: Red banner (crimson bg) for live updates, auto-scroll
+- **Search Bar**: Prominent, expandable, with autocomplete dropdown
+- **Secondary Nav**: Breadcrumbs for article pages, section navigation
 
-### Hero Section (Homepage)
-- **3D Quantum Canvas**: Full viewport Three.js background with rotating political globe, interactive particle system (120+ elements), neural network visualization
-- **Centered Content**: Glassmorphism card with H1 "POLITICA ARGENTINA", tagline "Análisis Político Cuántico", dual CTAs (primary: "Explorar Predicciones" + outline: "Ver Dashboard")
-- **Live Metrics Ticker**: Bottom overlay showing real-time political indicators
+### Hero Section (Lead Package)
+- **Featured Story**: Large image (16:9), bold serif headline (Display size), deck text, author/date metadata
+- **Secondary Stories**: 2-3 smaller stories in grid layout, image + headline + excerpt
+- **Editorial Badge**: "Análisis Exclusivo", "Predicción IA", "Breaking" labels
+- **No decorative effects**: Clean, content-first approach
 
-### Data Visualization Cards
-- **Holographic Panels**: Frosted glass cards with border-l-4 accent colors, 3D CSS transforms on hover (translateZ, rotateY), containing:
-  - Chart.js/Recharts visualizations
-  - Real-time metrics with animated counters
-  - Interactive sliders for scenario modeling
-  - Blockchain verification badges
+### Article Cards (Professional)
+- **Image-First Layout**: High-quality photo, 16:9 or 3:2 aspect ratio
+- **Serif Headlines**: Playfair Display, 24-28px, bold, 2-line max
+- **Metadata Row**: Author (sans-serif), date, read time, category badge
+- **Excerpt**: 2 lines, Inter sans-serif, muted color
+- **Hover State**: Subtle elevation, headline color shift to crimson
+- **Border**: 1px subtle border in light mode, none in dark
 
-### Article Cards
-- **Layout**: Grid of 3 columns (lg), 2 (md), 1 (sm)
-- **Structure**: Image (16:9 aspect), category badge (top-left overlay), title, author + date metadata, excerpt (2 lines), read time + engagement metrics
-- **Effects**: Hover lifts card (translateY -4px), glowing border animation
+### Data Visualization (Bloomberg-Inspired)
+- **Insights Panels**: Clean white/dark cards with teal accent borders for data
+- **Chart Styles**: Line charts, bar graphs, minimal decoration, professional color palette
+- **Metrics Display**: Large numbers (32px), label below, trend indicator (arrow)
+- **Live Updates**: Pulsing indicator dot, timestamp, "LIVE" badge
+- **Tables**: Striped rows, monospace numbers, aligned right for data
 
-### Interactive Features
-- **Neural Network Widget**: Canvas element showing 4-layer network with visible connections, color-coded activation patterns
-- **3D Argentina Map**: Interactive provinces with hover tooltips, electoral data overlays, prediction heat maps
-- **Quantum Scenario Modeler**: Tabs for multiple political scenarios, probability sliders, animated transitions between states
-- **Audio Spectrum Analyzer**: 32-band visualization synced to political sentiment data
-
-### Admin Dashboard Components
-- **Tabbed Interface**: 6 primary sections (SEO, Analytics, GEO Metrics, Neural Network, Blockchain, AR Config)
-- **Real-time Charts**: Line/area charts with live data streaming, comparative analysis overlays
-- **AI Audit Reports**: Cards with traffic light indicators (red/yellow/green), expandable details, action buttons
+### Interactive Features (Refined IA)
+- **Prediction Dashboard**: Clean cards showing scenarios, probability bars, confidence scores
+- **Electoral Maps**: Choropleth maps with professional color scales, hover tooltips
+- **Sentiment Analysis**: Text-based display with subtle background colors
+- **AI Insights Box**: Bordered panel with "IA Analysis" header, bullet points, confidence meter
 
 ---
 
 ## Animations & Effects
 
-### GSAP ScrollTrigger
-- Section reveals with stagger effects (0.1s delay per element)
-- Parallax on background elements (0.5x scroll speed)
-- Number counters animating on viewport entry
-- 3D card rotations following scroll position
+### Subtle Professional Animations
+- **Scroll Reveals**: Fade-up on scroll (20px translate), 0.4s ease-out
+- **Hover States**: Smooth color transitions (0.2s), subtle elevations (2-4px)
+- **Loading States**: Skeleton screens with subtle shimmer
+- **Page Transitions**: Cross-fade between pages (0.3s)
 
-### Three.js/WebGL
-- Quantum particle system with mouse repulsion/attraction
-- Morphing geometric shapes (icosahedron → dodecahedron → octahedron)
-- Custom GLSL shaders for quantum field effects
-- Orbital camera controls with smooth damping
+### Performance Guidelines
+- **No heavy 3D effects**: Focus on content, not decoration
+- **Reduced motion support**: Respect prefers-reduced-motion
+- **60 FPS target**: Optimize all animations
+- **Progressive enhancement**: Core content works without JS
 
-### Framer Motion
-- Page transitions with fade + slide
-- Modal animations with scale + opacity
-- Loading states with skeleton shimmer
-- Micro-interactions on buttons/inputs
-
-### Performance Constraints
-- Maximum 60 FPS target
-- Reduced motion support via prefers-reduced-motion
-- Lazy load heavy 3D elements below fold
-- Progressive enhancement approach
+### Interaction Patterns
+- **Click feedback**: Immediate visual response on buttons
+- **Focus states**: 2px outline in brand color, high contrast
+- **Disabled states**: 50% opacity, cursor: not-allowed
+- **Loading indicators**: Spinner or progress bar for async actions
 
 ---
 
 ## Images & Media
 
-### Hero Image Strategy
-**No traditional hero image** - Replaced with live 3D quantum visualization canvas providing dynamic, ever-changing backdrop.
-
-### Article Images
-- **Aspect Ratio**: 16:9 for cards, 21:9 for featured articles
-- **Format**: AVIF primary, WebP fallback, optimized with Sharp
-- **Loading**: Lazy load with blur-up placeholder (10px preview)
-- **Overlays**: Gradient overlays (from transparent to rgba(0,0,0,0.7)) on card images for text readability
+### Editorial Photography
+- **Aspect Ratios**: 16:9 (standard), 3:2 (feature), 1:1 (profile)
+- **Quality**: High-resolution, journalistic style, professional composition
+- **Alt Text**: Descriptive, SEO-optimized, accessible
+- **Captions**: Below image, italic, smaller font, credit attribution
 
 ### Data Visualizations
-- Export Chart.js as static images for SEO (with alt tags describing data)
-- Infographics with descriptive alt text (e.g., "Gráfico predictivo electoral Argentina 2025 por provincia")
-- Icon library: Heroicons for UI elements, custom SVG for political entities
+- **Chart Export**: Static fallbacks for SEO, canvas-based interactivity
+- **Color Accessibility**: Colorblind-safe palettes, pattern fills as backup
+- **Responsive**: Mobile-optimized chart layouts, horizontal scroll for tables
+- **Labels**: Clear, readable, multilingual support (ES primary)
 
-### Multimedia Integration
-- Video embeds with custom player UI matching design system
-- Audio waveforms for podcast/speech analysis
-- AR markers for camera-based overlays (future-ready)
+### Video Integration
+- **Inline Players**: Custom controls matching design system
+- **Thumbnails**: High-quality poster frames, play button overlay
+- **Captions**: Available in Spanish, accessible controls
 
 ---
 
 ## Accessibility & Responsiveness
 
-### Mobile-First Approach
-- Base styles for mobile (375px), progressive enhancement to 768px, 1024px, 1440px, 1920px
-- Touch-friendly targets (min 44x44px)
-- Simplified 3D effects on mobile (reduced particle count)
-- Bottom navigation for mobile article reading
+### WCAG AAA Compliance
+- **Contrast Ratios**: 7:1 for body text, 4.5:1 minimum for all text
+- **Focus Indicators**: Visible, high contrast, never removed
+- **Keyboard Navigation**: Full site navigable without mouse
+- **Screen Readers**: Semantic HTML, ARIA labels, live regions for updates
 
-### Dark Mode Excellence
-- Consistent dark theme across entire portal
-- Form inputs: bg-neutral-800 with border-neutral-700
-- Focus states: ring-2 ring-primary with ring-offset-2 ring-offset-neutral-900
-- Sufficient contrast ratios (WCAG AAA where possible)
+### Mobile Excellence
+- **Touch Targets**: Minimum 44x44px for all interactive elements
+- **Thumb Zones**: Critical actions in easy-to-reach areas
+- **Readable Text**: 16px minimum, no horizontal scroll
+- **Fast Loading**: Optimized images, lazy loading, code splitting
 
-### Voice/Keyboard Navigation
-- Skip links for main content
-- Full keyboard navigation with visible focus indicators
-- ARIA labels on interactive 3D elements
-- Screen reader announcements for live data updates
+### Dark Mode (Professional)
+- **Automatic Detection**: Respects system preference
+- **Manual Toggle**: User can override, preference saved
+- **Consistent Hierarchy**: Same visual weight in both modes
+- **Reduced Eye Strain**: Lower contrast in dark mode (not pure black)
 
 ---
 
 ## Key Differentiators
 
-1. **Quantum Visualization Layer**: Unlike competitors' static designs, every element feels alive with quantum-inspired animations
-2. **Holographic Information Architecture**: Multi-dimensional data presentation surpassing traditional 2D layouts
-3. **AI-First Interface**: Neural network visualizations and predictive analytics front-and-center
-4. **Performance Excellence**: Sub-80ms Core Web Vitals despite advanced effects
-5. **Blockchain Transparency**: Visible cryptographic verification for trust signals
+1. **Editorial Credibility**: Design language of global news leaders (CNN, Bloomberg, NYT)
+2. **AI Integration**: Advanced predictive analytics presented professionally, not gimmicky
+3. **Typography Excellence**: Dual-font system (serif headlines, sans UI) for hierarchy and readability
+4. **Data Visualization**: Bloomberg-quality charts and insights, professionally styled
+5. **Performance**: Fast, accessible, works everywhere, progressive enhancement
+6. **Trust Signals**: Clean design, authoritative voice, transparent methodology
 
-This design system positions POLITICA ARGENTINA as the world's most technologically advanced political analysis portal, far exceeding Argentine competitors like Clarín, La Nación, and Infobae in both visual sophistication and analytical depth.
+This design system positions POLÍTICA ARGENTINA as Argentina's most credible and technologically advanced political intelligence platform, matching international standards while maintaining cutting-edge AI capabilities.
